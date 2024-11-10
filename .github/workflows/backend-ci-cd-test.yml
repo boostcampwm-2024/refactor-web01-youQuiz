@@ -1,9 +1,9 @@
-name: main 브랜치에서 백엔드 CI/CD 파이프라인 구축
+name: develop 브랜치에서 백엔드 CI/CD 파이프라인 테스트
 
 on:
   push:
     branches:
-      - 'main'
+      - 'develop'
     paths:
       - 'packages/BE/**'
   workflow_dispatch:
@@ -35,9 +35,6 @@ jobs:
     if: success()
 
     steps:
-      # - name: 소스 코드 불러오기
-      #   uses: actions/checkout@v4
-
       - name: Github Actions Public IP 가져오기
         id: ip
         run: |
@@ -66,8 +63,17 @@ jobs:
           username: ${{ secrets.NCP_SERVER_USERNAME}}
           password: ${{ secrets.NCP_SERVER_PASSWORD}}
           port: ${{ secrets.NCP_SERVER_PORT}}
-          # script: |
-          #   # 프로젝트 디렉토리로 이동
+          script: |
+            cd /you-quiz-test
+            git switch develop
+            git pull origin develop
+
+            docker build -f Dockerfile.be -t you-quiz-be-test .
+
+            docker stop you-quiz-be-test || true
+            docker rm you-quiz-be-test || true
+
+            docker run -d --name you-quiz-be-test --env-file ./packages/BE/.env -p 80:3000 you-quiz-be-test
 
       - name: Github Actions IP를 ACG, ACL 규칙에서 삭제
         run: |
