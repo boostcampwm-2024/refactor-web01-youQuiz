@@ -1,4 +1,4 @@
- name: develop 브랜치에서 프론트엔드 CI/CD 파이프라인 구축
+name: develop 브랜치에서 프론트엔드 CI/CD 파이프라인 구축
 
 on:
   push:
