@@ -45,7 +45,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_CLIENT_PASSWORD }}
 
       - name: Docker build
-        run: docker build -t ${{ secrets.DOCKER_HUB_CLIENT_USERNAME }}/you-quiz-fe:${{ github.run_number }} Dockerfile.fe
+        run: docker build -t ${{ secrets.DOCKER_HUB_CLIENT_USERNAME }}/you-quiz-fe:${{ github.run_number }} -f Dockerfile.fe .
 
       - name: Push to docker hub
         run: docker push ${{ secrets.DOCKER_HUB_CLIENT_USERNAME }}/you-quiz-fe:${{ github.run_number }}
