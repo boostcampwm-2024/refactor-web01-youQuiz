@@ -57,7 +57,7 @@ jobs:
           chmod -R 777 ~/cli_linux
           cd ~/cli_linux
           ./ncloud vserver addAccessControlGroupInboundRule --regionCode KR --vpcNo ${{ secrets.NCP_VPC_ID }} --accessControlGroupNo ${{ secrets.NCP_AGC_ID }} --accessControlGroupRuleList "protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.public_ip }}/32', portRange='${{ secrets.SSH_PORT }}'"
-          ./ncloud vpc addNetworkAclInboundRule --regionCode KR --networkAclNo ${{ secrets.NCP_ACL_ID }} --networkAclRuleList "priority='${{ secrets.NCP_ACL_PRIORITY}}', protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.public_ip }}/32', portRange='${{ secrets.SSH_PORT }}', ruleActionCode='ALLOW'"
+          ./ncloud vpc addNetworkAclInboundRule --regionCode KR --networkAclNo ${{ secrets.NCP_ACL_ID }} --networkAclRuleList "priority='${{ secrets.BE_NCP_ACL_PRIORITY}}', protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.public_ip }}/32', portRange='${{ secrets.SSH_PORT }}', ruleActionCode='ALLOW'"
 
       - name: NCP 서버에 SSH로 접속 후 배포
         uses: appleboy/ssh-action@master
@@ -83,4 +83,4 @@ jobs:
           chmod -R 777 ~/cli_linux
           cd ~/cli_linux
           ./ncloud vserver removeAccessControlGroupInboundRule --regionCode KR --vpcNo ${{ secrets.NCP_VPC_ID }} --accessControlGroupNo ${{ secrets.NCP_AGC_ID }} --accessControlGroupRuleList "protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.public_ip }}/32', portRange='${{ secrets.SSH_PORT }}'"
-          ./ncloud vpc removeNetworkAclInboundRule --regionCode KR --networkAclNo ${{ secrets.NCP_ACL_ID }} --networkAclRuleList "priority='${{ secrets.NCP_ACL_PRIORITY}}', protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.public_ip }}/32', portRange='${{ secrets.SSH_PORT }}', ruleActionCode='ALLOW'"
+          ./ncloud vpc removeNetworkAclInboundRule --regionCode KR --networkAclNo ${{ secrets.NCP_ACL_ID }} --networkAclRuleList "priority='${{ secrets.BE_NCP_ACL_PRIORITY}}', protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.public_ip }}/32', portRange='${{ secrets.SSH_PORT }}', ruleActionCode='ALLOW'"
