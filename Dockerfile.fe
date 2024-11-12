@@ -6,7 +6,7 @@ WORKDIR /app
 # 종속성 파일만 먼저 복사하여 캐시 활용
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY tsconfig.json ./
-COPY .yarn ./.yarn 
+# COPY .yarn ./.yarn 
 COPY packages ./packages
 
 # 종속성 설치
