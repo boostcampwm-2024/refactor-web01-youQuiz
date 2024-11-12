@@ -71,8 +71,6 @@ jobs:
           ./ncloud vserver addAccessControlGroupInboundRule --regionCode KR --vpcNo ${{ secrets.NCP_VPC_ID }} --accessControlGroupNo ${{ secrets.NCP_AGC_ID }} --accessControlGroupRuleList "protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.public_ip }}/32', portRange='${{ secrets.SSH_PORT }}'"
           ./ncloud vpc addNetworkAclInboundRule --regionCode KR --networkAclNo ${{ secrets.NCP_ACL_ID }} --networkAclRuleList "priority='${{ secrets.FE_NCP_ACL_PRIORITY}}', protocolTypeCode='TCP', ipBlock='${{ steps.ip.outputs.public_ip }}/32', portRange='${{ secrets.SSH_PORT }}', ruleActionCode='ALLOW'"
 
-      - name: docker build and docker hub push
-
       - name: NCP 서버에 SSH로 접속 후 배포
         uses: appleboy/ssh-action@master
         with:
