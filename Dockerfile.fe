@@ -34,10 +34,10 @@ RUN yarn install
 
 # 환경 변수 설정
 ENV NODE_ENV production
-ENV PORT 3000
+ENV PORT 4173
 
 # 포트 설정
-EXPOSE 3000
+EXPOSE 4173
 
 # 실행 명령어
 CMD ["yarn", "workspace", "client", "preview", "--host", "0.0.0.0"]
