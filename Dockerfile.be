@@ -13,7 +13,7 @@ WORKDIR /app/packages/server
 
 COPY ./packages/server .
 
-RUN yarn install --frozen-lockfile
+RUN yarn install
 RUN yarn add tslib
 
 EXPOSE 3000
