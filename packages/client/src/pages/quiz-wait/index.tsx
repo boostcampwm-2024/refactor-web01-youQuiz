@@ -3,6 +3,8 @@ import { generateRandomPositions } from '@/shared/utils/generateRandomPositions'
 import { QRCodeSVG } from 'qrcode.react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getQuizSocket } from '@/shared/utils/socket';
+import { getCookie } from '@/shared/utils/cookie';
 
 // TODO: 파일 분리
 const GUEST_DISPLAY_SIZE = { width: 1020, height: 576 };
@@ -11,16 +13,21 @@ const BUTTON_SIZE = { width: 74, height: 44 };
 
 // TODO: API 연동 후 삭제
 const fakeLink = 'https://google.com';
-const fakeGuests = ['도훈', '성현', '병찬', '채원'];
 
 const from = { x: SPACING, y: SPACING };
 const to = { x: GUEST_DISPLAY_SIZE.width - SPACING, y: GUEST_DISPLAY_SIZE.height - SPACING };
-const count = fakeGuests.length;
 
 export default function QuizWait() {
   const buttonRefs = useRef<HTMLDivElement[]>([]);
   const [buttonSize, setButtonSize] = useState(BUTTON_SIZE);
   const navigate = useNavigate();
+  const [guests, setGuests] = useState<string[]>([]);
+  const guestCount = guests.length;
+  const socket = getQuizSocket();
+
+  socket.on('nickname', (response) => {
+    setGuests((prev) => [response.nickname, ...prev]);
+  });
 
   useLayoutEffect(() => {
     if (buttonRefs.current.length > 0) {
@@ -34,7 +41,7 @@ export default function QuizWait() {
     }
   }, []);
 
-  const randomPositions = generateRandomPositions({ from, to, count, buttonSize });
+  const randomPositions = generateRandomPositions({ from, to, count: guestCount, buttonSize });
 
   const handleCopyLink = () => {
     try {
@@ -47,9 +54,7 @@ export default function QuizWait() {
   };
 
   const handleQuizStart = () => {
-    // DEMO 용도로 바로 퀴즈 페이지로 이동 추후 삭제
-    navigate('/quiz/session');
-    // TODO: socket.emit을 통해 전체 사용자에게 퀴즈 시작 이벤트 전달
+    socket.emit('master entry', { classId: '123', sid: getCookie('sid') });
   };
 
   return (
@@ -79,7 +84,7 @@ export default function QuizWait() {
                 }
               }}
             >
-              <CustomButton type="full" color="light" label={fakeGuests[index]} size="md" />
+              <CustomButton type="full" color="light" label={guests[index]} size="md" />
             </div>
           ))}
         </div>
