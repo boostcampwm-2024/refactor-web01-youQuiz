@@ -16,7 +16,7 @@ export default function Nickname() {
     const sid = getCookie('sid');
     if (sid) {
       socket.emit('participant re-entry', { pinCode: pinCode, nickname: nickname, sid: sid });
-      navigate('/quiz/wait');
+      navigate(`/quiz/wait/${pinCode}`);
       return;
     }
     socket.emit('participant entry', { pinCode: pinCode, nickname: nickname });
@@ -24,7 +24,7 @@ export default function Nickname() {
     socket.on('session', (response) => {
       setCookie('sid', response);
     });
-    navigate(`/quiz/wait${pinCode}`);
+    navigate(`/quiz/wait/${pinCode}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

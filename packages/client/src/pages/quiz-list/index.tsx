@@ -70,12 +70,12 @@ export default function QuizList() {
     const pinCode = await waitForSocketEvent('pincode', socket);
     setCookie('pincode', pinCode);
 
-    navigate('/quiz/wait');
+    navigate(`/quiz/wait/${pinCode}`);
   };
   return (
     <div className="flex flex-col gap-10 w-full mt-6 mr-6">
       {quizList.map((quiz, index) => (
-        <div>
+        <div key={quiz.title}>
           <div
             className={`flex justify-between itemds-center min-w-content h-20 items-center bg-white ${selectedQuizIndex === index ? 'border-secondary' : 'border-border'}  border rounded-base p-6 cursor-pointer`}
             onClick={() => handleSelectQuiz(index)}
@@ -102,7 +102,7 @@ export default function QuizList() {
               className={`flex flex-col gap-3 p-6 mt-4 border ${selectedQuizIndex === index ? 'border-secondary' : 'border-border'} rounded-base bg-white`}
             >
               {quiz.quizzes.map((quizData, index) => (
-                <span>
+                <span key={quizData.content}>
                   {index + 1}번 문제: {quizData.content}
                 </span>
               ))}

@@ -75,8 +75,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     gameInfo.participantList.push(nickname);
     this.redisService.set(`gameId=${pinCode}`, JSON.stringify(gameInfo));
 
-    client.emit('nickname', gameInfo.participantList);
-    client.to(pinCode).emit('nickname', gameInfo.participantList);
+    // client.emit('nickname', gameInfo.participantList);
+    // client.to(pinCode).emit('nickname', gameInfo.participantList);
+    this.server.to(pinCode).emit('nickname', gameInfo.participantList);
   }
 
   @SubscribeMessage('nickname')
@@ -85,8 +86,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const gameInfo = JSON.parse(await this.redisService.get(`gameId=${pinCode}`));
 
-    client.emit('nickname', gameInfo.participantList);
-    client.to(pinCode).emit('nickname', gameInfo.participantList);
+    // client.emit('nickname', gameInfo.participantList);
+    // client.to(pinCode).emit('nickname', gameInfo.participantList);
+    this.server.to(pinCode).emit('nickname', gameInfo.participantList);
   }
 
   @SubscribeMessage('show quiz')
@@ -104,17 +106,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const currentQuizData = quizData[currentOrder];
 
-    client.emit('show quiz', currentQuizData);
-    client.to(pinCode).emit('show quiz', currentQuizData);
+    // client.emit('show quiz', currentQuizData);
+    // client.to(pinCode).emit('show quiz', currentQuizData);
+    this.server.to(pinCode).emit('show quiz', currentQuizData);
 
-    //gameInfo.currentOrder += 1;
+    // gameInfo.currentOrder += 1;
     await this.redisService.set(`gameId=${pinCode}`, JSON.stringify(gameInfo));
 
-    // 로딩 2초 지나면, 시간잰다고 알림
     // setTimeout(() => {
-    //   client.emit('time check', { is_timestart: true });
-    //   this.startTimer(client, pinCode, currentQuizData['timeLimit']);
+    //   this.startTimer(pinCode, currentQuizData.timeLimit);
     // }, 2000);
+
+    // redis currentOrder + 1
   }
 
   startTimer(client: Socket, pinCode: string, timeLimit: number) {
