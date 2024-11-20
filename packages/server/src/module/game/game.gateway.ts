@@ -135,7 +135,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       console.log('Invalid pinCode');
     }
 
-    this.server.to(pinCode).emit('start quiz', { isStarted: true });
+    client.to(pinCode).emit('start quiz', { isStarted: true });
   }
 
   //퀴즈를 보내고 나서 타이머 재기 시작
