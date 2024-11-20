@@ -129,9 +129,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleStartQuiz(client: Socket, payload: any) {
     const { sid, pinCode } = payload;
 
-    const { pinCode: storedPinCode } = JSON.parse(
-      await this.redisService.get(`master_sid=${pinCode}`),
-    );
+    const { pinCode: storedPinCode } = JSON.parse(await this.redisService.get(`master_sid=${sid}`));
 
     if (storedPinCode !== pinCode) {
       console.log('Invalid pinCode');
