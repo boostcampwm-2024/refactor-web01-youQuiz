@@ -97,7 +97,7 @@ export default function QuizCreatePage() {
         onQuizUpdate={(updatedData: QuizData) => {
           setQuizzes((prev) => {
             const newQuizzes = [...prev];
-            newQuizzes[currentQuizIndex] = updatedData;
+            newQuizzes[currentQuizIndex] = { ...updatedData, position: currentQuizIndex };
             return newQuizzes;
           });
         }}
