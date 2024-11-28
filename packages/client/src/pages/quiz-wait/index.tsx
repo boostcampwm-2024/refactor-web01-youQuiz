@@ -9,10 +9,9 @@ import LoadingSpinner from '@/shared/assets/icons/loading-alt-loop.svg?react';
 import { apiClient } from '@/shared/api';
 import UserGridView from './ui/UserGridView';
 
-interface Guest {
+export interface Guest {
   nickname: string;
   character: number;
-  message: string;
   position: number;
 }
 
@@ -20,6 +19,7 @@ export default function QuizWait() {
   const { pinCode } = useParams();
   const [userType, setUserType] = useState<string>('');
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [myPosition, setMyPosition] = useState<number>(0);
 
   const guestLink = `${import.meta.env.VITE_CLIENT_URL}/nickname/${pinCode}`;
   const socket = getQuizSocket();
@@ -28,9 +28,20 @@ export default function QuizWait() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    socket.on('nickname', (response) => {
-      setGuests([...response]);
-    });
+    const handleMyPosition = (response: any) => {
+      const { participantList, myPosition } = response;
+      setGuests(participantList);
+      setMyPosition(myPosition);
+    };
+
+    socket.on('my position', handleMyPosition);
+
+    const handleNickname = (response: any) => {
+      const { participantList } = response;
+      setGuests(participantList);
+    };
+
+    socket.on('nickname', handleNickname);
 
     const fetchUserType = async () => {
       const response = await apiClient.get(`/games/${pinCode}/sid/${getCookie('sid')}`);
@@ -43,6 +54,10 @@ export default function QuizWait() {
     });
 
     fetchUserType();
+
+    return () => {
+      socket.off('nickname', handleNickname);
+    };
   }, []);
 
   const handleCopyLink = () => {
@@ -90,7 +105,7 @@ export default function QuizWait() {
               {guests.length === 0 ? 'no' : guests.length} participants
             </p>
           </div>
-          <UserGridView guests={guests} />
+          <UserGridView guests={guests} myPosition={myPosition} />
         </div>
         {userType === 'master' && (
           <div className="flex justify-end min-w-full">
