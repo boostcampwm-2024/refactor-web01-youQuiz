@@ -54,9 +54,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const gameInfo = JSON.parse(gameInfoJson);
         const nicknameEventData = {
           participantList: gameInfo.participantList,
-          myPosition: position,
         };
-        client.emit('nickname', nicknameEventData);
+        client.emit('my position', {
+          participantList: gameInfo.participantList,
+          myPosition: position,
+        });
       }
     }
   }
@@ -129,19 +131,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     gameInfo.participantList.push(pariticipantInfo);
     await this.redisService.set(`gameId=${pinCode}`, JSON.stringify(gameInfo));
 
-    const nicknameEventData = { participantList: gameInfo.participantList, myPosition: position };
-    this.server.to(pinCode).emit('nickname', nicknameEventData);
+    const nicknameEventData = { participantList: gameInfo.participantList };
+
+    client.emit('my position', { participantList: gameInfo.participantList, myPosition: position });
+    client.to(pinCode).emit('nickname', nicknameEventData);
   }
-
-  //이거 사용하는 이벤트 맞는지 확인/////////////////
-  // @SubscribeMessage('nickname')
-  // async handleNickname(client: Socket, payload: any) {
-  //   const { pinCode } = payload;
-
-  //   const gameInfo = JSON.parse(await this.redisService.get(`gameId=${pinCode}`));
-
-  //   this.server.to(pinCode).emit('nickname', gameInfo.participantList);
-  // }
 
   @SubscribeMessage('show quiz')
   async handleShowQuiz(client: Socket, payload: any) {
@@ -393,5 +387,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     selectedAnswer.sort();
 
     return equals(selectedAnswer, correctAnswers);
+  }
+
+  @SubscribeMessage('message')
+  async handleMessage(client: Socket, payload: any) {
+    const { pinCode, message, position } = payload;
+    this.server.to(pinCode).emit('message', { message, position });
   }
 }
