@@ -21,18 +21,25 @@ export default function RecentSubmittedAnswers({
 }: RecentSubmittedAnswersProps) {
   useEffect(() => {
     setHistory((prev) => {
-      const newHistory = userSubmitHistory.map(([user, submitTime]) => ({
-        user,
-        submitTime,
-        elapsedTime: 0,
-      }));
+      const newHistory = userSubmitHistory.map(([user, submitTime]) => {
+        const existedHistory = prev.find(
+          (item) => item.user === user && item.submitTime === submitTime,
+        );
+        return {
+          user,
+          submitTime,
+          elapsedTime: existedHistory ? existedHistory.elapsedTime : 0,
+        };
+      });
+
       const mergedHistory = [...newHistory, ...prev].reduce<HistoryItem[]>((acc, item) => {
         if (!acc.some((i) => i.user === item.user && i.submitTime === item.submitTime)) {
           acc.push(item);
         }
         return acc;
       }, []);
-      return mergedHistory.slice(0, 4);
+
+      return mergedHistory;
     });
   }, [userSubmitHistory]);
 
