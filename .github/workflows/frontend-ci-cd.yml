@@ -32,5 +32,8 @@ jobs:
           docker run -d \
             --name you-quiz-fe \
             --env-file packages/client/.env \
-            -p 80:4173 \
+            -v /etc/letsencrypt/live/www.you-quiz.site/fullchain.pem:/etc/nginx/ssl/fullchain.pem \
+            -v /etc/letsencrypt/live/www.you-quiz.site/privkey.pem:/etc/nginx/ssl/privkey.pem \
+            -p 80:80 \
+            -p 443:443 \
             you-quiz-fe:${{ github.run_number }}
