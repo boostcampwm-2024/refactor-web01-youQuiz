@@ -1,8 +1,6 @@
-// const BASE_URL = import.meta.env.VITE_SERVER_URL
-//   ? `${import.meta.env.VITE_SERVER_URL}/api`
-//   : 'http://localhost:3000/api';
-
-const BASE_URL = 'https://www.you-quiz.site/api';
+const BASE_URL = import.meta.env.VITE_SERVER_URL
+  ? `${import.meta.env.VITE_SERVER_URL}/api`
+  : 'http://localhost:3000/api';
 
 interface FetchOptions extends Omit<RequestInit, 'body'> {
   headers?: Record<string, string>;
