@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Quiz } from '../entities/quiz.entity';
 import { Choice } from '../entities/choice.entity';
-import { CreateQuizRequestDto } from '../dto/create-quiz.request.dto';
-import { UpdateQuizRequestDto } from '../dto/update-quiz.request.dto';
+import { CreateQuizRequestDto } from '../dto/request/create-quiz.request.dto';
+import { UpdateQuizRequestDto } from '../dto/request/update-quiz.request.dto';
 
 @Injectable()
 export class QuizRepository {
@@ -25,26 +25,40 @@ export class QuizRepository {
       point,
       createdAt: new Date(),
     });
-    return await this.repository.save(quizEntity);
-  }
-
-  async findById(id: number): Promise<Quiz> {
-    return this.repository.findOne({ where: { id } });
+    try {
+      return await this.repository.save(quizEntity);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create quiz');
+    }
   }
 
   async findAll(): Promise<Quiz[]> {
-    return this.repository.find();
+    try {
+      const result = await this.repository.find();
+      if (!result) {
+        throw new NotFoundException(`No quizzes found`);
+      }
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to fetch quizzes');
+    }
   }
 
   async findByClassId(classId: number): Promise<Quiz[]> {
-    return this.repository.find({
-      where: { class: { id: classId } },
-      relations: ['choices'],
-    });
-  }
-
-  async deleteByClassId(classId: number): Promise<void> {
-    await this.repository.delete({ classId });
+    try {
+      const result = await this.repository.find({
+        where: { class: { id: classId } },
+        relations: ['choices'],
+      });
+      if (!result) {
+        throw new NotFoundException(`No quizzes found for classId ${classId}`);
+      }
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to fetch quizzes');
+    }
   }
 
   async updateQuizzes(classId: number, quizDataList: UpdateQuizRequestDto[]): Promise<void> {

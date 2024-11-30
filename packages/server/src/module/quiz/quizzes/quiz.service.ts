@@ -1,18 +1,26 @@
-import { Injectable, HttpException, HttpStatus, Param, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  Param,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { QuizRepository } from './repositories/quiz.repository';
 import { ChoiceRepository } from './repositories/choice.repository';
 import { ClassRepository } from './repositories/class.repository';
-import { CreateClassRequestDto } from './dto/create-class.request.dto';
-import { CreateQuizListRequestDto } from './dto/create-quizlist.request.dto';
+import { CreateClassRequestDto } from './dto/request/create-class.request.dto';
+import { CreateClassResponseDto } from './dto/response/create-class.response.dto';
+import { CreateQuizListRequestDto } from './dto/request/create-quizlist.request.dto';
 import { ResponseDto } from '../../utils/dto/response.dto';
 import { Quiz } from './entities/quiz.entity';
-import { ClassResponseDto } from './dto/class.response.dto';
-import { QuizResponseDto } from './dto/quiz.response.dto';
-import { UpdateClassRequestDto } from './dto/update-class.request.dto';
-import { UpdateQuizRequestDto } from './dto/update-quiz.request.dto';
-import { UpdateQuizListRequestDto } from './dto/update-quizlist.request.dto';
-import { CreateClassResponseDto } from './dto/create-class.response.dto';
+import { QuizResponseDto } from './dto/response/quiz.response.dto';
+import { UpdateClassRequestDto } from './dto/request/update-class.request.dto';
+import { UpdateQuizRequestDto } from './dto/request/update-quiz.request.dto';
+import { UpdateQuizListRequestDto } from './dto/request/update-quizlist.request.dto';
+import { GetClassResponseDto } from './dto/response/get-class.response.dto';
+import { Class } from './entities/class.entity';
 
 @Injectable()
 export class QuizService {
@@ -23,9 +31,49 @@ export class QuizService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getClasses(): Promise<ClassResponseDto[]> {
-    const classes = await this.classRepository.findAll();
-    return classes.map(ClassResponseDto.fromEntity);
+  async createClass(createClassRequestDto: CreateClassRequestDto): Promise<CreateClassResponseDto> {
+    const classEntity = await this.classRepository.create(createClassRequestDto);
+
+    const responseDto = CreateClassResponseDto.fromEntity(classEntity);
+
+    return responseDto;
+  }
+
+  async createQuiz(classId: number, quizData: CreateQuizListRequestDto): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await this.classRepository.findClassById(classId);
+      await Promise.all(
+        quizData.quizzes.map(async (quiz) => {
+          const quizEntity = await this.quizRepository.create(classId, quiz);
+          await Promise.all(
+            quiz.choices.map(async (choice) => {
+              await this.choiceRepository.create(quizEntity.id, choice);
+            }),
+          );
+        }),
+      );
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Failed to create quiz');
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async getAllClasses(): Promise<GetClassResponseDto[]> {
+    const classEntities = await this.classRepository.findAll();
+
+    if (!classEntities || classEntities.length === 0) {
+      throw new NotFoundException(`No classes found`);
+    }
+
+    return classEntities.map((classEntity: Class) => GetClassResponseDto.fromEntity(classEntity));
   }
 
   async getQuizzesByClassId(classId: number): Promise<any> {
@@ -38,128 +86,33 @@ export class QuizService {
     return quizzes.map((quiz) => QuizResponseDto.fromEntity(quiz));
   }
 
-  async createClass(createClassRequestDto: CreateClassRequestDto): Promise<CreateClassResponseDto> {
-    try {
-      const classEntity = await this.classRepository.create(createClassRequestDto);
-      return CreateClassResponseDto.fromEntity(classEntity);
-    } catch (error) {
-      console.error('error:', error);
-      throw error;
+  async updateClass(id: number, updateData: UpdateClassRequestDto): Promise<void> {
+    const classEntity = await this.classRepository.findById(id);
+
+    if (!classEntity) {
+      throw new HttpException(`Class with ID ${id} not found`, HttpStatus.NOT_FOUND);
     }
+
+    await this.classRepository.update(id, updateData);
   }
 
-  // dto가 여러개라서 처리하기 좀 그러네 quiz, choice는 dto가 아니라 인터페이스로 구현하는게 좋지않을까라는 생각...?
-  async createQuiz(classId: number, quizData: CreateQuizListRequestDto): Promise<ResponseDto> {
-    // 그럼 이 컨트롤러에서 dto 구분이 힘들다
-    // 너무 이 메서드에 책임이 많은게 아닌가 라는 생각도 든다.
-    // const queryRunner = this.dataSource.createQueryRunner();
-    // await queryRunner.connect();
-    // await queryRunner.startTransaction();
-    try {
-      // class_id가 유효한지 확인
-      const is_valid_class = await this.classRepository.findClassById(classId);
-      if (!is_valid_class) {
-        throw new Error(`Class with ID ${classId} not found`);
-      }
+  async updateQuiz(classId: number, dto: UpdateQuizListRequestDto): Promise<void> {
+    const quizEntity = await this.classRepository.findById(classId);
 
-      await Promise.all(
-        quizData.quizzes.map(async (quiz) => {
-          const quizEntity = await this.quizRepository.create(classId, quiz);
-          quiz.choices.map(async (choice) => {
-            this.choiceRepository.create(quizEntity.id, choice);
-          });
-        }),
-      );
-
-      // await queryRunner.commitTransaction();
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Quiz created successfully',
-      };
-    } catch (error) {
-      // await queryRunner.rollbackTransaction();
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.FORBIDDEN,
-          error: `${error}`,
-        },
-        HttpStatus.FORBIDDEN,
-        {
-          cause: error,
-        },
-      );
+    if (!quizEntity) {
+      throw new HttpException(`Quiz with ID ${classId} not found`, HttpStatus.NOT_FOUND);
     }
-    // } finally {
-    //     await queryRunner.release();
-    // }
+
+    await this.quizRepository.updateQuizzes(classId, dto.quizzes);
   }
 
-  async findAll(): Promise<Quiz[]> {
-    return this.quizRepository.findAll();
-  }
+  async deleteClass(id: number): Promise<void> {
+    const classEntity = await this.classRepository.findClassWithRelations(id);
 
-  // id에 해당하는 클래스와 퀴즈, 선택지를 삭제한다.
-  async deleteClass(id: number): Promise<ResponseDto> {
-    try {
-      const classEntity = await this.classRepository.findClassWithRelations(id);
-
-      if (!classEntity) {
-        throw new HttpException(`Class with ID ${id} not found`, HttpStatus.NOT_FOUND);
-      }
-
-      await this.classRepository.deleteWithRelations(classEntity);
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Class and all related entities deleted successfully',
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: `Failed to delete class: ${error}`,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    if (!classEntity) {
+      throw new NotFoundException(`Class with ID ${id} not found`);
     }
-  }
 
-  // id에 해당하는 클래스의 정보를 수정한다.
-  async updateClass(id: number, updateData: UpdateClassRequestDto): Promise<ResponseDto> {
-    try {
-      const classEntity = await this.classRepository.findById(id);
-
-      if (!classEntity) {
-        throw new HttpException(`Class with ID ${id} not found`, HttpStatus.NOT_FOUND);
-      }
-
-      await this.classRepository.update(id, updateData);
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Class updated successfully',
-      };
-    } catch (error) {
-      throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  async updateQuiz(classId: number, dto: UpdateQuizListRequestDto): Promise<ResponseDto> {
-    try {
-      const quizEntity = await this.classRepository.findById(classId);
-      if (!quizEntity) {
-        throw new HttpException(`Quiz with ID ${classId} not found`, HttpStatus.NOT_FOUND);
-      }
-
-      await this.quizRepository.updateQuizzes(classId, dto.quizzes);
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Quiz updated successfully',
-      };
-    } catch (error) {
-      throw new HttpException(`error: ${error}`, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    await this.classRepository.deleteWithRelations(classEntity);
   }
 }
