@@ -8,11 +8,11 @@
 
 
  <p align=center>
-  <a href="https://www.notion.so/e3906f064a574f58a7adc5bb0bf59e64?v=0f21d87970884f3db3c2541122804cba](https://cookie-lentil-cdb.notion.site/1498e498b4af815ab62de893deaee0d0?v=1498e498b4af81a4aa01000c9a21f45e&pvs=4">팀 노션</a>
+  <a href="https://www.notion.so/1498e498b4af815ab62de893deaee0d0?v=1498e498b4af81a4aa01000c9a21f45e&pvs=4">팀 노션</a>
   &nbsp; | &nbsp; 
   <a href="https://github.com/orgs/boostcampwm-2024/projects/19">백로그</a>
   &nbsp; | &nbsp;
-  <a href="https://lemon-scene-5c9.notion.site/12e622fa707b809abe4ff76038787e27?pvs=74">기획서</a>   &nbsp;
+  <a href="https://www.notion.so/1498e498b4af81bebad6f2df3c1e065c?pvs=4">기획서</a>   &nbsp;
   <br />
   <a href="https://github.com/boostcampwm-2024/web01-youQuiz/wiki/%EA%B7%B8%EB%9D%BC%EC%9A%B4%EB%93%9C-%EB%A3%B0">그라운드 룰</a>
   &nbsp; | &nbsp; 
