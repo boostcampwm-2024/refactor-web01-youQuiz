@@ -20,7 +20,6 @@ export default function QuizEnd() {
   useEffect(() => {
     socket.emit('show ranking', { pinCode, sid: getCookie('sid') }, (response: any) => {
       setRanking(response);
-      console.log(response);
     });
   }, []);
 
@@ -35,28 +34,28 @@ export default function QuizEnd() {
           <div className="flex flex-col items-center gap-2">
             <div className="relative w-24 h-52 bg-gradient-to-t from-gray-300 to-gray-200 rounded-base">
               <span className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-2xl font-semibold text-gray-600">
-                {ranking.rankerDatas?.[1]?.score}
+                {ranking.rankerData?.[1]?.score}
               </span>
             </div>
-            <Nickname nickname={ranking.rankerDatas?.[1]?.nickname} />
+            <Nickname nickname={ranking.rankerData?.[1]?.nickname} />
           </div>
 
           <div className="flex flex-col items-center gap-2">
             <div className="relative w-28 h-64 bg-gradient-to-t from-yellow-300 to-yellow-50 rounded-base">
               <span className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-2xl font-semibold text-gray-600">
-                {ranking.rankerDatas?.[0]?.score}
+                {ranking.rankerData?.[0]?.score}
               </span>
             </div>
-            <Nickname nickname={ranking.rankerDatas?.[0]?.nickname} />
+            <Nickname nickname={ranking.rankerData?.[0]?.nickname} />
           </div>
 
           <div className="flex flex-col items-center gap-2">
             <div className="relative w-24 h-44 bg-gradient-to-t from-orange-300 to-orange-200 rounded-base">
               <span className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-2xl font-semibold text-gray-600">
-                {ranking.rankerDatas?.[2]?.score}
+                {ranking.rankerData?.[2]?.score}
               </span>
             </div>
-            <Nickname nickname={ranking.rankerDatas?.[2]?.nickname} />
+            <Nickname nickname={ranking.rankerData?.[2]?.nickname} />
           </div>
         </div>
 
