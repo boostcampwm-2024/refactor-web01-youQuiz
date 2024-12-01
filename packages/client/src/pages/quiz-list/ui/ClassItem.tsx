@@ -78,7 +78,9 @@ export default function ClassItem({ index, quizList }: ClassItemProps) {
       </div>
       {selectedClassIndex === index && (
         <div className={`flex flex-col gap-3 p-4 -mt-4 border shadow-sm rounded-base bg-white`}>
-          {quizList.quizzes.length === 0 && <span>퀴즈가 없습니다.</span>}
+          {quizList.quizzes.length === 0 && (
+            <span className="text-md font-semibold text-gray-600">퀴즈가 없습니다.</span>
+          )}
           {quizList.quizzes.map((quizData, quizIndex) => (
             <span key={`${quizData.content} ${quizIndex}`}>
               <span className="text-md font-bold text-secondary">Q{quizIndex + 1}: </span>
