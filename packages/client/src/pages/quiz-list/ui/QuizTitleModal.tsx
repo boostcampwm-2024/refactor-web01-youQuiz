@@ -3,6 +3,8 @@ import { useCreateClass } from '@/shared/hooks/classes';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import CloseIcon from '@/shared/assets/icons/close.svg?react';
+
 interface QuizTitleModalProps {
   onClose: () => void;
 }
@@ -32,13 +34,16 @@ export default function QuizTitleModal({ onClose }: QuizTitleModalProps) {
   };
   return (
     <form
-      className="w-[480px] h-[250px] flex flex-col items-center justify-center gap-4 p-5 bg-white rounded-lg border border-gray-200"
+      className="relative w-[480px] h-[250px] flex flex-col items-center justify-center gap-4 p-5 bg-white rounded-lg border border-gray-200"
       onClick={(e) => e.stopPropagation()}
       onSubmit={(e) => {
         e.preventDefault();
         handleConfirmClick();
       }}
     >
+      <button type="button" className="absolute top-5 right-5" onClick={onClose}>
+        <CloseIcon className="w-5 h-5" />
+      </button>
       <h1 className="text-xl font-bold">클래스 정보를 입력해주세요</h1>
       <input
         type="text"
