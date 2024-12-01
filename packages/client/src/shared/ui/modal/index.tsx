@@ -8,6 +8,18 @@ export default function Modal({ children, onClose }: ModalProps) {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    });
+    return () => {
+      document.removeEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      });
+    };
   }, []);
   if (!isMounted) return null;
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
