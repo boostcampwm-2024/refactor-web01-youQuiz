@@ -146,14 +146,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return participantSid;
   }
 
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('participant notice')
   async handleParticipantNotice(client: Socket, dto) {
     const { pinCode } = dto;
     client.to(pinCode).emit('participant notice');
   }
 
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('participant info')
   async handleNickname(client: Socket, dto) {
     const { pinCode, sid } = dto;
@@ -170,8 +170,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { myPosition, participantList };
   }
 
-
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('start quiz')
   async handleStartQuiz(client: Socket, payload: StartQuizRequestDto) {
     const { sid, pinCode } = payload;
@@ -226,8 +225,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { isStarted: true };
   }
 
-
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('show quiz')
   async handleShowQuiz(client: Socket, payload: ShowQuizRequestDto) {
     const { pinCode } = payload;
@@ -253,7 +251,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { quizMaxNum, currentQuizData, startTime, isLast };
   }
 
-
   private async storeQuizToRedis(classId: number) {
     const cachedQuizData = await this.redisService.get(`classId=${classId}`);
 
@@ -269,7 +266,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return quizData;
   }
 
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('submit answer')
   async handleSubmitAnswer(client: Socket, payload: SubmitAnswerRequestDto) {
     const { pinCode, sid, selectedAnswer, submitTime } = payload;
@@ -343,7 +340,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { submitOrder: totalSubmit };
   }
 
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('emoji')
   async handleEmoji(client: Socket, payload: EmojiRequestDto) {
     const { pinCode, currentOrder, emoji } = payload;
@@ -367,7 +364,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return 0;
   }
 
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('time end')
   async handleTimeEnd(client: Socket, payload: any) {
     const { pinCode } = payload;
@@ -375,7 +372,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     await this.redisService.set(`gameId=${pinCode}`, JSON.stringify(gameInfo));
   }
 
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('show ranking')
   async handleShowRanking(client: Socket, payload: ShowRankingRequestDto) {
     const { pinCode, sid } = payload;
@@ -403,7 +400,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return showRankingData;
   }
 
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('end quiz')
   async handleEndQuiz(client: Socket, payload: EndQuizRequestDto) {
     const { sid, pinCode } = payload;
@@ -435,7 +432,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return equals(selectedAnswer, correctAnswers);
   }
 
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('leaderboard')
   async handleLeaderboard(client: Socket, payload: LeaderboardRequestDto) {
     const { pinCode } = payload;
@@ -464,7 +461,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return leaderboardData;
   }
 
-  @UseGuards(SessionGuard)
+  // @UseGuards(SessionGuard)
   @SubscribeMessage('message')
   async handleMessage(client: Socket, payload: MessageRequestDto) {
     const { pinCode, message, position } = payload;
