@@ -9,7 +9,7 @@ import { Server, Socket } from 'socket.io';
 import { RedisService } from '../../../config/database/redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GameService } from './game.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UseGuards } from '@nestjs/common';
 import { MasterEntryRequestDto } from './dto/request/master-entry.request.dto';
 import { ParticipantEntryRequestDto } from './dto/request/participant-entry.request.dto';
 import { ShowQuizRequestDto } from './dto/request/show-quiz.request.dto';
@@ -29,6 +29,7 @@ import {
 import { CONVERT_TO_MS } from '@shared/constants/utils.constants';
 import { CONNECTION_TYPES } from '@shared/types/connection.types';
 import { GAMESTATUS_TYPES } from '@shared/types/gameStatus.types';
+import { SessionGuard } from '../../guards/session.guard';
 
 @Injectable()
 @WebSocketGateway({
@@ -145,12 +146,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return participantSid;
   }
 
+  @UseGuards(SessionGuard)
   @SubscribeMessage('participant notice')
   async handleParticipantNotice(client: Socket, dto) {
     const { pinCode } = dto;
     client.to(pinCode).emit('participant notice');
   }
 
+  @UseGuards(SessionGuard)
   @SubscribeMessage('participant info')
   async handleNickname(client: Socket, dto) {
     const { pinCode, sid } = dto;
@@ -167,6 +170,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { myPosition, participantList };
   }
 
+
+  @UseGuards(SessionGuard)
   @SubscribeMessage('start quiz')
   async handleStartQuiz(client: Socket, payload: StartQuizRequestDto) {
     const { sid, pinCode } = payload;
@@ -196,7 +201,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const currentQuizData = quizData[updatedCurrentOrder];
 
     const choicesLength = currentQuizData['choices'].length;
-
     const choiceStatus = Object.fromEntries(
       Array.from({ length: choicesLength }, (_, i) => [i, 0]),
     );
@@ -222,13 +226,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { isStarted: true };
   }
 
-  // @SubscribeMessage('time end')
-  // async handleTimeEnd(client: Socket, payload: any) {
-  //   const { pinCode } = payload;
-  //   const gameInfo = JSON.parse(await this.redisService.get(`gameId=${pinCode}`));
-  //   await this.redisService.set(`gameId=${pinCode}`, JSON.stringify(gameInfo));
-  // }
 
+  @UseGuards(SessionGuard)
   @SubscribeMessage('show quiz')
   async handleShowQuiz(client: Socket, payload: ShowQuizRequestDto) {
     const { pinCode } = payload;
@@ -245,35 +244,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const isLast = gameInfo.currentOrder === quizMaxNum ? true : false;
 
-    console.log('show quiz before', client.id, currentOrder);
     // 기존에 퀴즈가 저장된적이 있는지. start quiz에 저장되어있음
     const quizRedis = JSON.parse(
       await this.redisService.get(`gameId=${pinCode}:quizId=${currentOrder}`),
     );
-    console.log('show quiz', client.id, quizRedis);
 
     const startTime = quizRedis.startTime;
     return { quizMaxNum, currentQuizData, startTime, isLast };
-    // await this.intervalTimeSender(pinCode, startTime, currentTimeLimit);
   }
 
-  // async intervalTimeSender(pinCode: string, startTime: number, timeLimit: number) {
-  //   const intervalId = setInterval(async () => {
-  //     const currentTime = Date.now();
-  //     const elapsedTime = currentTime - startTime;
-  //     const remainingTime = (timeLimit + QUIZ_WAITING_TIME) * 1000 - elapsedTime;
-  //     if (remainingTime <= 0) {
-  //       const gameInfo = JSON.parse(await this.redisService.get(`gameId=${pinCode}`));
-
-  //       gameInfo.currentOrder += 1;
-  //       await this.redisService.set(`gameId=${pinCode}`, JSON.stringify(gameInfo));
-  //       this.server.to(pinCode).emit('time end', { isEnd: true });
-  //       clearInterval(intervalId);
-  //       return;
-  //     }
-  //     this.server.to(pinCode).emit('timer tick', { currentTime, elapsedTime, remainingTime });
-  //   }, INTERVAL_TIME);
-  // }
 
   private async storeQuizToRedis(classId: number) {
     const cachedQuizData = await this.redisService.get(`classId=${classId}`);
@@ -290,6 +269,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return quizData;
   }
 
+  @UseGuards(SessionGuard)
   @SubscribeMessage('submit answer')
   async handleSubmitAnswer(client: Socket, payload: SubmitAnswerRequestDto) {
     const { pinCode, sid, selectedAnswer, submitTime } = payload;
@@ -363,6 +343,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return { submitOrder: totalSubmit };
   }
 
+  @UseGuards(SessionGuard)
   @SubscribeMessage('emoji')
   async handleEmoji(client: Socket, payload: EmojiRequestDto) {
     const { pinCode, currentOrder, emoji } = payload;
@@ -386,6 +367,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return 0;
   }
 
+  @UseGuards(SessionGuard)
+  @SubscribeMessage('time end')
+  async handleTimeEnd(client: Socket, payload: any) {
+    const { pinCode } = payload;
+    const gameInfo = JSON.parse(await this.redisService.get(`gameId=${pinCode}`));
+    await this.redisService.set(`gameId=${pinCode}`, JSON.stringify(gameInfo));
+  }
+
+  @UseGuards(SessionGuard)
   @SubscribeMessage('show ranking')
   async handleShowRanking(client: Socket, payload: ShowRankingRequestDto) {
     const { pinCode, sid } = payload;
@@ -413,6 +403,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return showRankingData;
   }
 
+  @UseGuards(SessionGuard)
   @SubscribeMessage('end quiz')
   async handleEndQuiz(client: Socket, payload: EndQuizRequestDto) {
     const { sid, pinCode } = payload;
@@ -444,6 +435,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return equals(selectedAnswer, correctAnswers);
   }
 
+  @UseGuards(SessionGuard)
   @SubscribeMessage('leaderboard')
   async handleLeaderboard(client: Socket, payload: LeaderboardRequestDto) {
     const { pinCode } = payload;
@@ -472,6 +464,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return leaderboardData;
   }
 
+  @UseGuards(SessionGuard)
   @SubscribeMessage('message')
   async handleMessage(client: Socket, payload: MessageRequestDto) {
     const { pinCode, message, position } = payload;
