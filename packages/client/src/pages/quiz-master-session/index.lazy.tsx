@@ -8,8 +8,7 @@ import { useQuizSession } from '../quiz-session/model/hooks/useQuizSession';
 import QuizMasterHeader from './ui/QuizMasterHeader';
 import Statistics from './ui/Statistics';
 import { clearLocalStorage } from '@/shared/utils/clearLocalStorage';
-
-const LOCAL_STORAGE_KEYS = ['masterStatistics', 'reactionStats', 'history', 'remainingTime'];
+import { MASTER_LOCAL_STORAGE_KEYS } from '@/shared/constants/masterLocalStorageKey';
 
 export default function QuizMasterSessionLazyPage() {
   const { pinCode, id } = useParams();
@@ -22,13 +21,13 @@ export default function QuizMasterSessionLazyPage() {
   const handleNextQuiz = () => {
     if (quiz.isLast) {
       socket.emit('end quiz', { pinCode, sid: getCookie('sid') });
-      clearLocalStorage(LOCAL_STORAGE_KEYS);
+      clearLocalStorage(MASTER_LOCAL_STORAGE_KEYS);
       navigate(`/quiz/session/${pinCode}/end`);
       return;
     }
 
     socket.emitWithAck('start quiz', { pinCode, sid: getCookie('sid') }).then(() => {
-      clearLocalStorage(LOCAL_STORAGE_KEYS);
+      clearLocalStorage(MASTER_LOCAL_STORAGE_KEYS);
       navigate(`/quiz/session/host/${pinCode}/${parseInt(id as string) + 1}`);
       refetch();
       setInitializeStates(true);

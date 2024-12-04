@@ -10,22 +10,14 @@ import UserGridView from './ui/UserGridView';
 import { useNickname } from './model/hooks/useNickname';
 import MasterChat from './ui/MasterChat';
 import { clearLocalStorage } from '@/shared/utils/clearLocalStorage';
+import { GUEST_LOCAL_STORAGE_KEYS } from '@/shared/constants/guestLocalStorageKey';
+import { MASTER_LOCAL_STORAGE_KEYS } from '@/shared/constants/masterLocalStorageKey';
 
 export interface Guest {
   nickname: string;
   character: number;
   position: number;
 }
-
-const GUEST_LOCAL_STORAGE_KEYS = [
-  'isQuizEnd',
-  'reactionStats',
-  'participantStatistics',
-  'hasSubmitted',
-  'submitOrder',
-  'ramainingTime',
-];
-const MASTER_LOCAL_STORAGE_KEYS = ['masterStatistics', 'reactionStats', 'history', 'remainingTime'];
 
 export default function QuizWaitLazyPage() {
   const socket = getQuizSocket();

@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getQuizSocket } from '@/shared/utils/socket';
 import { useShowRanking } from '../model/hooks/useShowRanking';
 import { clearLocalStorage } from '@/shared/utils/clearLocalStorage';
+import { GUEST_LOCAL_STORAGE_KEYS } from '@/shared/constants/guestLocalStorageKey';
 interface QuizEndProps {
   quizOrder: number;
   refetch: () => void;
@@ -18,15 +19,6 @@ const Nickname = ({ nickname }: { nickname: string }) => {
   );
 };
 
-const LOCAL_STORAGE_KEYS = [
-  'isQuizEnd',
-  'reactionStats',
-  'participantStatistics',
-  'hasSubmitted',
-  'submitOrder',
-  'ramainingTime',
-];
-
 export default function QuizEnd({ refetch, setQuizEnd }: QuizEndProps) {
   const socket = getQuizSocket();
   const navigate = useNavigate();
@@ -36,14 +28,14 @@ export default function QuizEnd({ refetch, setQuizEnd }: QuizEndProps) {
 
   useEffect(() => {
     const handleStartQuiz = () => {
-      clearLocalStorage(LOCAL_STORAGE_KEYS);
+      clearLocalStorage(GUEST_LOCAL_STORAGE_KEYS);
       navigate(`/quiz/session/${pinCode}/${parseInt(id as string) + 1}`);
       setQuizEnd(false);
       refetch();
     };
 
     const handleEndQuiz = () => {
-      clearLocalStorage(LOCAL_STORAGE_KEYS);
+      clearLocalStorage(GUEST_LOCAL_STORAGE_KEYS);
       navigate(`/quiz/session/${pinCode}/end`);
     };
 
