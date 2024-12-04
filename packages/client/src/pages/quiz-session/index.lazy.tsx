@@ -6,12 +6,34 @@ import QuizHeader from './ui/QuizHeader';
 import { useQuizSession } from './model/hooks/useQuizSession';
 import { usePersistState } from '@/shared/hooks/usePersistState';
 import { getQuizSocket } from '@/shared/utils/socket';
+import { useEffect } from 'react';
+import { clearLocalStorage } from '@/shared/utils/clearLocalStorage';
+import { GUEST_LOCAL_STORAGE_KEYS } from '@/shared/constants/guestLocalStorageKey';
 
 export default function QuizSessionLazyPage() {
   const socket = getQuizSocket();
   const { pinCode } = useParams();
   const [isQuizEnd, setIsQuizEnd] = usePersistState('isQuizEnd', false);
   const { data: quiz, refetch } = useQuizSession({ socket, pinCode: pinCode as string });
+
+  useEffect(() => {
+    const prevCurrentOrder = localStorage.getItem('currentOrder');
+    if (prevCurrentOrder) {
+      parseInt(prevCurrentOrder) !== quiz.currentQuizData.position &&
+        clearLocalStorage(GUEST_LOCAL_STORAGE_KEYS);
+    }
+
+    const handleBeforeUnload = () => {
+      localStorage.setItem('currentOrder', quiz.currentQuizData.position.toString());
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <>
       {!isQuizEnd && (
