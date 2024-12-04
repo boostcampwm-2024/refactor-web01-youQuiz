@@ -45,4 +45,8 @@ export class RedisService {
   async zcard(key: string) {
     return await this.redis.zcard(key);
   }
+
+  async zrem(key: string, member: string) {
+    await this.redis.zrem(key, member);
+  }
 }

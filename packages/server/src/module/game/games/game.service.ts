@@ -5,6 +5,7 @@ import { QuizRepository } from '../../quiz/quizzes/repositories/quiz.repository'
 import { RedisService } from '../../../config/database/redis/redis.service';
 import { Quiz } from 'src/module/quiz/quizzes/entities/quiz.entity';
 import { PARTICIPANT_MAX_NUMBER } from '@shared/constants/game.constants';
+import { GAMESTATUS_TYPES } from '@shared/types/gameStatus.types';
 
 @Injectable()
 export class GameService {
@@ -96,11 +97,22 @@ export class GameService {
   }
 
   async checkGameStatus(sid: string, pinCode: string) {
+    const isExist = await this.redisService.exists(`participant_sid=${sid}`);
+    const gameInfo = JSON.parse(await this.redisService.get(`gameId=${pinCode}`));
+    if (!isExist) {
+      // 게임에서 나가진 경우
+      if (gameInfo.gameStatus === GAMESTATUS_TYPES.WAITING) {
+        return { isPossible: true, gameStatus: null };
+      }
+      return { isPossible: false, gameStatus: null, message: '게임에서 나가셨습니다.' };
+    }
+
     const { pinCode: joinedPinCode } = JSON.parse(
       await this.redisService.get(`participant_sid=${sid}`),
     );
 
     if (joinedPinCode !== pinCode) {
+      // 본인이 참여한 핀코드가 아닌 경우
       return { isPossible: false, gameStatus: null };
     }
 

@@ -41,6 +41,7 @@ import { SessionGuard } from '../../guards/session.guard';
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+  private disconnectTimers = new Map<string, NodeJS.Timeout>();
 
   constructor(
     private readonly redisService: RedisService,
@@ -48,41 +49,132 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   async handleConnection(client: Socket) {
+    console.log(`Client connected: ${client.id}`);
     const { sid } = client.handshake?.auth;
+    // 쿠키 sid가 없는 경우
     if (!sid) {
       return;
     }
 
+    // 쿠키에 sid는 존재하지만, 유저 정보가 없는 경우
     const sidType = await this.gameService.checkSidType(sid);
+    if (!sidType) {
+      return;
+    }
+
+    // 쿠키에 sid가 존재하고, 유저 정보가 있는 경우
     const key = sidType.type === 'master' ? `master_sid=${sid}` : `participant_sid=${sid}`;
-
+    console.log('connected key : ', key);
     const data = JSON.parse(await this.redisService.get(key));
-
+    console.log('connected data : ', data);
     if (data) {
       const { pinCode } = data;
       data['socketId'] = client.id;
       data['connection'] = CONNECTION_TYPES.ON;
-
       await this.redisService.set(key, JSON.stringify(data));
+      await this.redisService.set(`${client.id}`, JSON.stringify({ sid, type: sidType.type }));
       client.join(pinCode);
+      if (sidType.type === 'master') return;
+
+      const gameInfo = JSON.parse(await this.redisService.get(`gameId=${pinCode}`));
+      gameInfo.participantList[data.position]['connection'] = CONNECTION_TYPES.ON;
+      await this.redisService.set(`gameId=${pinCode}`, JSON.stringify(gameInfo));
+
+      client.to(pinCode).emit('participant notice');
     }
   }
 
   async handleDisconnect(client: Socket) {
-    // TODO: 대기 중에 사람이 나갈 경우 갱신해주는 부분 추가 필요
     console.log(`Client disconnected: ${client.id}`);
-    // TODO: connection 상태 변경 필요
-    // 마스터 참여자 여부에 따라서 disconnection 관리 로직 다를듯
-    // const timeoutKey = `timeout:${client.id}`;
-    // await this.redisService.set(timeoutKey, 'delete', 'EX', 30);
+    const { sid } = JSON.parse(await this.redisService.get(`${client.id}`));
+    if (!sid) {
+      return;
+    }
+    const sidType = await this.gameService.checkSidType(sid);
+    if (!sidType) {
+      return;
+    }
+    console.log('disconnected sid : ', sid);
+    const key = sidType.type === 'master' ? `master_sid=${sid}` : `participant_sid=${sid}`;
+    console.log('disconnected type key : ', key);
+    const myInfo = JSON.parse(await this.redisService.get(key));
+    console.log('disconnected myInfo : ', myInfo);
+    // 마스터인 경우 제외 제외하기
+    if (sidType.type === 'master') return;
 
-    // // 30초 후 데이터 삭제 로직
-    // setTimeout(async () => {
-    //   const timeoutExists = await this.redisService.get(timeoutKey);
-    //   if (timeoutExists) {
-    //     await this.redisService.del(client.id);
-    //   }
-    // }, 30000);
+    myInfo['connection'] = CONNECTION_TYPES.OFF;
+
+    const gameInfo = JSON.parse(await this.redisService.get(`gameId=${myInfo.pinCode}`));
+    gameInfo.participantList[myInfo.position].connection = CONNECTION_TYPES.OFF;
+
+    await this.redisService.set(key, JSON.stringify(myInfo));
+    await this.redisService.set(`gameId=${myInfo.pinCode}`, JSON.stringify(gameInfo));
+    await this.redisService.del(`${client.id}`);
+
+    client.to(myInfo.pinCode).emit('participant notice');
+  }
+
+  @SubscribeMessage('leave room')
+  async handleLeaveRoom(client: Socket, payload: any) {
+    const { sid, pinCode } = payload;
+    const participantDataJson = await this.redisService.get(`participant_sid=${sid}`);
+    const participantData = JSON.parse(participantDataJson);
+    const { position } = participantData;
+
+    if (!participantDataJson) {
+      client.to(pinCode).emit('participant notice');
+      return;
+    }
+    console.log(`Participant removal started for sid: ${sid}`);
+
+    // 게임 정보 가져오기
+    const gameKey = `gameId=${pinCode}`;
+    const gameInfoJson = await this.redisService.get(gameKey);
+    if (!gameInfoJson) {
+      return;
+    }
+    const gameInfo = JSON.parse(gameInfoJson);
+
+    // 게임 상태 확인 (대기 중인지)
+    if (gameInfo.gameStatus !== GAMESTATUS_TYPES.WAITING) {
+      return;
+    }
+
+    const gameSidList = JSON.parse(await this.redisService.get(`gameId=${pinCode}:sid`));
+
+    const removeIndex = gameInfo.participantList.findIndex(
+      (participant) => participant.position === position,
+    );
+
+    if (removeIndex !== -1) {
+      gameInfo.participantList.splice(removeIndex, 1);
+      gameSidList.sidList.splice(removeIndex, 1);
+
+      gameInfo.participantList.slice(removeIndex).forEach(async (participant, index) => {
+        participant.position = removeIndex + index;
+        const sid = gameSidList.sidList[participant.position];
+        const participantInfo = JSON.parse(await this.redisService.get(`participant_sid=${sid}`));
+        participantInfo.position = participant.position;
+        await this.redisService.set(`participant_sid=${sid}`, JSON.stringify(participantInfo));
+      });
+    }
+
+    await this.redisService.set(`gameId=${pinCode}:sid`, JSON.stringify(gameSidList));
+
+    // 게임 정보 업데이트
+    await this.redisService.set(gameKey, JSON.stringify(gameInfo));
+
+    // Redis에서 참가자 데이터 삭제
+    await this.redisService.del(`participant_sid=${sid}`);
+
+    // 랭킹 ZSET에서 참가자 제거
+    await this.redisService.zrem(`gameId=${pinCode}:ranking`, sid);
+
+    // '대기방 이탈' 이벤트 전송
+    client.to(pinCode).emit('participant notice');
+    console.log(`Participant removal completed for sid: ${sid}`);
+    // 타이머 제거
+    console.log(`Participant removal completed for sid: ${sid}`);
   }
 
   @SubscribeMessage('master entry')
@@ -101,7 +193,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(pinCode);
 
     await this.redisService.set(`master_sid=${masterSid}`, JSON.stringify(masterinfo));
-
+    await this.redisService.set(`${client.id}`, JSON.stringify({ sid: masterSid, type: 'master' }));
+    await this.redisService.set(`gameId=${pinCode}:sid`, JSON.stringify({ sidList: [] }));
     const quizData = await this.storeQuizToRedis(classId);
     const quizMaxNum = quizData.length - 1;
     const gameStatus = GAMESTATUS_TYPES.WAITING;
@@ -118,7 +211,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleSession(client: Socket, dto) {
     const { pinCode, nickname } = dto;
     const socketId = client.id;
-
+    console.log('seesion:', client.id);
     const gameInfo = JSON.parse(await this.redisService.get(`gameId=${pinCode}`));
     const participantLength = gameInfo.participantList.length;
 
@@ -132,11 +225,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const connection = CONNECTION_TYPES.ON;
 
     const clientInfo = { pinCode, nickname, socketId, character, position, connection };
-
+    await this.redisService.set(
+      `${client.id}`,
+      JSON.stringify({ sid: participantSid, type: 'participant' }),
+    );
+    console.log('session:', pinCode);
     client.join(pinCode);
 
     await this.redisService.set(`participant_sid=${participantSid}`, JSON.stringify(clientInfo));
     await this.redisService.zincrby(`gameId=${pinCode}:ranking`, 0, participantSid);
+    const gameSidList = JSON.parse(await this.redisService.get(`gameId=${pinCode}:sid`));
+    gameSidList.sidList.push(participantSid);
+    await this.redisService.set(`gameId=${pinCode}:sid`, JSON.stringify(gameSidList));
 
     const pariticipantInfo = { nickname, character, position, connection };
     gameInfo.participantList.push(pariticipantInfo);
