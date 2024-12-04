@@ -12,7 +12,6 @@ export default function QuizSessionLazyPage() {
   const { pinCode } = useParams();
   const [isQuizEnd, setIsQuizEnd] = usePersistState('isQuizEnd', false);
   const { data: quiz, refetch } = useQuizSession({ socket, pinCode: pinCode as string });
-
   return (
     <>
       {!isQuizEnd && (
@@ -21,8 +20,13 @@ export default function QuizSessionLazyPage() {
             startTime={quiz.startTime}
             timeLimit={quiz.currentQuizData.timeLimit}
             setQuizEnd={setIsQuizEnd}
+            totalParticipants={quiz.participantLength}
           />
-          <QuizBox quiz={quiz.currentQuizData} startTime={quiz.startTime} />
+          <QuizBox
+            quiz={quiz.currentQuizData}
+            startTime={quiz.startTime}
+            quizMaxNum={quiz.quizMaxNum}
+          />
         </div>
       )}
       {isQuizEnd && (

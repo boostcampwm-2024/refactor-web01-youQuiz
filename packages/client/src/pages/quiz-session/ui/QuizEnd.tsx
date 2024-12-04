@@ -24,7 +24,7 @@ const LOCAL_STORAGE_KEYS = [
   'participantStatistics',
   'hasSubmitted',
   'submitOrder',
-  'remianingTime',
+  'ramainingTime',
 ];
 
 export default function QuizEnd({ refetch, setQuizEnd }: QuizEndProps) {
@@ -34,7 +34,6 @@ export default function QuizEnd({ refetch, setQuizEnd }: QuizEndProps) {
 
   const { data: ranking } = useShowRanking({ socket, pinCode: pinCode as string });
   console.log(ranking);
-  // TODO: localStorage 삭제하기
   useEffect(() => {
     const handleStartQuiz = () => {
       clearLocalStorage(LOCAL_STORAGE_KEYS);
@@ -58,7 +57,7 @@ export default function QuizEnd({ refetch, setQuizEnd }: QuizEndProps) {
   }, []);
 
   return (
-    <div className="h-[calc(100vh-78px)] bg-gradient-to-b from-blue-100 to-white p-4">
+    <div className="h-dvh bg-gradient-to-b from-blue-100 to-white p-4">
       <div className="max-w-2xl mx-auto mt-12 p-16 ">
         <div className="text-center mb-8">
           <span className="text-4xl font-semibold text-gray-600">🏆 중 간 점 검</span>
