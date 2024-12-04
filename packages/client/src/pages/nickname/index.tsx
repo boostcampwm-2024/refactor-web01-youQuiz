@@ -17,30 +17,31 @@ export default function Nickname() {
   const toast = toastController();
   const [nickname, setNickname] = useState('');
 
-  const handleNicknameSubmit = async (nickname: string) => {
-    const socket = getQuizSocket();
-    const sid = await emitEventWithAck<string>(socket, 'session', {
-      pinCode: pinCode,
-      nickname: nickname,
-    });
-    if (!sid) {
-      toast.warning('방이 가득 찼습니다.');
-      navigate(`/`);
-    }
-    setCookie('sid', sid);
-    socket.emit('participant notice', { pinCode: pinCode });
-    navigate(`/quiz/wait/${pinCode}`);
-  };
+  const handleNicknameSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleNicknameSubmit(nickname);
+    const socket = getQuizSocket();
+    try {
+      const sid = await emitEventWithAck<string>(socket, 'session', {
+        pinCode: pinCode,
+        nickname: nickname,
+      });
+      if (!sid) {
+        toast.warning('방이 가득 찼습니다.');
+        navigate(`/`);
+        return;
+      }
+      setCookie('sid', sid);
+      socket.emit('participant notice', { pinCode: pinCode });
+      navigate(`/quiz/wait/${pinCode}`);
+    } catch (error) {
+      toast.error('닉네임 등록 중 문제가 발생했습니다.');
     }
   };
 
   return (
     <div className="flex flex-col items-center px-64 pt-16 min-w-[980px]">
-      <div className="flex flex-col items-center gap-3 w-fit">
+      <form className="flex flex-col items-center gap-3 w-fit" onSubmit={handleNicknameSubmit}>
         <label
           htmlFor="nickname"
           className="flex gap-2 ml-1 items-center text-xl font-bold self-start"
@@ -59,21 +60,19 @@ export default function Nickname() {
             className="w-[488px] bg-transparent focus:outline-none"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            onKeyDown={handleKeyDown}
             maxLength={MAX_NICKNAME_LENGTH}
           />
           <button
-            type="button"
+            type="submit"
             className={`w-20 h-10 text-white bg-primary rounded-3xl ${
               nickname.length === 0 ? 'opacity-50 cursor-not-allowed' : 'opacity-100'
             }`}
-            onClick={() => handleNicknameSubmit(nickname)}
             disabled={nickname.length === 0}
           >
             참가하기
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
