@@ -11,6 +11,8 @@ import RabbitImage from '@/shared/assets/characters/토끼.png';
 import PenguinImage from '@/shared/assets/characters/펭귄.png';
 import HamsterImage from '@/shared/assets/characters/햄스터.png';
 import { Calendar, Clock, Users } from 'lucide-react';
+import { QueryClient } from '@tanstack/react-query';
+
 // import ProgressBar from './ProgressBar';
 
 interface QuizHeaderProps {
@@ -18,6 +20,7 @@ interface QuizHeaderProps {
   timeLimit: number;
   setQuizEnd: React.Dispatch<React.SetStateAction<boolean>>;
   totalParticipants: number;
+  pinCode: string;
 }
 
 const characters = [DogImage, CatImage, PigImage, RabbitImage, PenguinImage, HamsterImage];
@@ -28,6 +31,7 @@ export default function QuizHeader({
   timeLimit,
   setQuizEnd,
   totalParticipants,
+  pinCode,
 }: QuizHeaderProps) {
   const [remainingTime, setRemainingTime] = usePersistState('ramainingTime', timeLimit);
   const [participantStatistics, setParticipantStatistics] = usePersistState(
@@ -39,6 +43,7 @@ export default function QuizHeader({
   const socket = getQuizSocket();
   const { data: myInfo } = useGetMyInfo({ socket });
   const { nickname, character } = myInfo;
+  const queryClient = new QueryClient();
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -57,6 +62,7 @@ export default function QuizHeader({
   useEffect(() => {
     if (remainingTime <= 0) {
       setQuizEnd(true);
+      queryClient.invalidateQueries({ queryKey: ['showRanking', pinCode] });
     }
   }, [remainingTime]);
 
