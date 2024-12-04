@@ -12,9 +12,17 @@ interface QuizBoxProps {
   quiz: QuizData;
   startTime: number;
   quizMaxNum: number;
+  initializeStates: boolean;
+  setInitializeStates: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function QuizBox({ quiz, startTime, quizMaxNum }: QuizBoxProps) {
+export default function QuizBox({
+  quiz,
+  startTime,
+  quizMaxNum,
+  initializeStates,
+  setInitializeStates,
+}: QuizBoxProps) {
   const { pinCode } = useParams();
   const [selectedAnswer, setSelectedAnswer] = useState<number[]>([]);
   const [hasSubmitted, setHasSubmitted] = usePersistState('hasSubmitted', false);
@@ -31,6 +39,19 @@ export default function QuizBox({ quiz, startTime, quizMaxNum }: QuizBoxProps) {
 
   const totalReactions = reactionStats.easy + reactionStats.hard;
   const easyPercentage = totalReactions ? (reactionStats.easy / totalReactions) * 100 : 50;
+
+  const initializeStatesHandler = () => {
+    setReactionStats(INITIAL_EMOJI);
+    setParticipantStatistics(INITIAL_PARTICIPANT_STATISTICS);
+    setHasSubmitted(false);
+  };
+
+  useEffect(() => {
+    if (initializeStates) {
+      initializeStatesHandler();
+      setInitializeStates(false);
+    }
+  }, [initializeStates]);
 
   const handleSelectAnswer = (idx: number) => {
     setSelectedAnswer((prev) => {

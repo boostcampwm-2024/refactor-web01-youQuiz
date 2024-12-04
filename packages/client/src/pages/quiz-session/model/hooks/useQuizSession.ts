@@ -5,6 +5,7 @@ import { Socket } from 'socket.io-client';
 interface UseQuizSessionProps {
   socket: Socket;
   pinCode: string;
+  quizOrder: number;
 }
 
 interface ShowQuizResponse {
@@ -15,9 +16,9 @@ interface ShowQuizResponse {
   participantLength: number;
 }
 
-export const useQuizSession = ({ socket, pinCode }: UseQuizSessionProps) => {
+export const useQuizSession = ({ socket, pinCode, quizOrder }: UseQuizSessionProps) => {
   return useSuspenseQuery({
-    queryKey: ['show quiz', pinCode],
+    queryKey: ['show quiz', pinCode, quizOrder],
     queryFn: () => emitEventWithAck<ShowQuizResponse>(socket, 'show quiz', { pinCode }),
   });
 };

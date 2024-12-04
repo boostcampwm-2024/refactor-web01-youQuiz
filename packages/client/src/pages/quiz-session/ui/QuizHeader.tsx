@@ -103,7 +103,9 @@ export default function QuizHeader({
             </div>
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-gray-500" />
-              <span className="text-lg text-gray-600">2024.12.03</span>
+              <span className="text-lg text-gray-600">
+                {new Date(startTime).toLocaleDateString()}
+              </span>
             </div>
           </div>
         </div>

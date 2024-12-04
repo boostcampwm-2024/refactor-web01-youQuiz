@@ -23,7 +23,6 @@ export default function QuizEnd({ refetch, setQuizEnd }: QuizEndProps) {
   const socket = getQuizSocket();
   const navigate = useNavigate();
   const { pinCode, id } = useParams();
-
   const { data: ranking } = useShowRanking({ socket, pinCode: pinCode as string });
 
   useEffect(() => {

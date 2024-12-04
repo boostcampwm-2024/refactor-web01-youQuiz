@@ -6,21 +6,30 @@ import QuizHeader from './ui/QuizHeader';
 import { useQuizSession } from './model/hooks/useQuizSession';
 import { usePersistState } from '@/shared/hooks/usePersistState';
 import { getQuizSocket } from '@/shared/utils/socket';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { clearLocalStorage } from '@/shared/utils/clearLocalStorage';
 import { GUEST_LOCAL_STORAGE_KEYS } from '@/shared/constants/guestLocalStorageKey';
 
 export default function QuizSessionLazyPage() {
   const socket = getQuizSocket();
-  const { pinCode } = useParams();
+  const { pinCode, id } = useParams();
   const [isQuizEnd, setIsQuizEnd] = usePersistState('isQuizEnd', false);
-  const { data: quiz, refetch } = useQuizSession({ socket, pinCode: pinCode as string });
+  const [initializeStates, setInitializeStates] = useState(false);
+  const { data: quiz, refetch } = useQuizSession({
+    socket,
+    pinCode: pinCode as string,
+    quizOrder: parseInt(id as string),
+  });
+
+  console.log(quiz.currentQuizData.timeLimit);
+  console.log(quiz.currentQuizData.position);
 
   useEffect(() => {
     const prevCurrentOrder = localStorage.getItem('currentOrder');
-    if (prevCurrentOrder) {
-      parseInt(prevCurrentOrder) !== quiz.currentQuizData.position &&
-        clearLocalStorage(GUEST_LOCAL_STORAGE_KEYS);
+    if (prevCurrentOrder !== null && parseInt(prevCurrentOrder) !== quiz.currentQuizData.position) {
+      clearLocalStorage(GUEST_LOCAL_STORAGE_KEYS);
+      setIsQuizEnd(false);
+      setInitializeStates(true);
     }
 
     const handleBeforeUnload = () => {
@@ -49,6 +58,8 @@ export default function QuizSessionLazyPage() {
             quiz={quiz.currentQuizData}
             startTime={quiz.startTime}
             quizMaxNum={quiz.quizMaxNum}
+            initializeStates={initializeStates}
+            setInitializeStates={setInitializeStates}
           />
         </div>
       )}

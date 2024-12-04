@@ -16,7 +16,11 @@ export default function QuizMasterSessionLazyPage() {
   const socket = getQuizSocket();
   const [initializeStates, setInitializeStates] = useState(false);
 
-  const { data: quiz, refetch } = useQuizSession({ socket, pinCode: pinCode as string });
+  const { data: quiz, refetch } = useQuizSession({
+    socket,
+    pinCode: pinCode as string,
+    quizOrder: parseInt(id as string),
+  });
 
   const handleNextQuiz = () => {
     if (quiz.isLast) {
