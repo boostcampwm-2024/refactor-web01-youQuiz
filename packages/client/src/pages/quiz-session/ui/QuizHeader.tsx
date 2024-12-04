@@ -13,7 +13,7 @@ import HamsterImage from '@/shared/assets/characters/햄스터.png';
 import { Calendar, Clock, Users } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
-// import ProgressBar from './ProgressBar';
+import ProgressBar from './ProgressBar';
 
 interface QuizHeaderProps {
   startTime: number;
@@ -72,7 +72,7 @@ export default function QuizHeader({
     <div className="relative z-10 p-6 max-w-4xl mx-auto pt-8 ">
       <div className="flex-col justify-between items-center bg-white backdrop-blur-sm rounded-2xl shadow-lg pb-4 px-4">
         <div className="flex justify-between">
-          <div className="flex flex-col p-2">
+          <div className="flex flex-col justify-center items-center p-2">
             <img
               src={characters[character]}
               alt={`${characterNames[character]}character`}
@@ -80,17 +80,17 @@ export default function QuizHeader({
             />
             <h3 className="font-lg text-gray-500">{nickname}</h3>
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center space-x-2 pt-6">
+          <div className="flex flex-col gap-3 w-52">
+            <div className="flex items-center justify-end space-x-2 pt-6">
               <Clock className="w-4 h-4 text-gray-500" />
               <span className="text-gray-600">{remainingTime}초 남음</span>
             </div>
-            {/* <ProgressBar
+            <ProgressBar
               type="gradient"
-              time={timeLimit as 5}
-              currentTime={remainingTime}
+              time={timeLimit}
+              remainingTime={remainingTime}
               pauseOnHover={false}
-            /> */}
+            />
           </div>
         </div>
         <div className="border-t-2 pt-2">
