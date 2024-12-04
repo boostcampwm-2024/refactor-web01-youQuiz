@@ -15,6 +15,9 @@ export default function PreventGuestRouter() {
     if (!sid && pinCode) {
       navigate(`/nickname/${pinCode}`);
     }
+    if (sid && pinCode) {
+      navigate(`/quiz/wait/${pinCode}`);
+    }
   }, [navigate, pinCode]);
 
   return <Outlet />;
