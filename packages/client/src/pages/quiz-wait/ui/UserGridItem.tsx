@@ -28,7 +28,6 @@ const randomColor = [
 ];
 
 export default function UserGridItem({ participant, isMine, otherMessage }: UserGridItemProps) {
-  // 내 메시지, 상대방들 메시지
   const [message, setMessage] = useState('');
   const [myMessage, setMyMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -129,7 +128,13 @@ export default function UserGridItem({ participant, isMine, otherMessage }: User
         )}
       </div>
       <div className="flex justify-center items-center gap-2 w-full mt-2">
-        <div className="w-[10px] h-[10px] rounded-full bg-green-500 animate-blink" />
+        {isMine && <div className="w-[10px] h-[10px] rounded-full bg-green-500 animate-blink" />}
+        {!isMine &&
+          (participant.connection === 'ON' ? (
+            <div className="w-[10px] h-[10px] rounded-full bg-green-500 animate-blink" />
+          ) : (
+            <div className="w-[10px] h-[10px] rounded-full bg-gray-300" />
+          ))}
         <div className="text-sm text-center truncate font-bold">{participant.nickname}</div>
       </div>
     </div>

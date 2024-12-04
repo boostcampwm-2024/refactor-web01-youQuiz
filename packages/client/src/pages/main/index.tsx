@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FloatingSquare from './ui/FloatingSquare';
 import FloatingQuestion from './ui/FloatingQuestion';
-import { getCookie } from '@/shared/utils/cookie';
+import { getCookie, deleteCookie } from '@/shared/utils/cookie';
 
 const mappingGameStatus = (status: string, pinCode: string) => {
   switch (status) {
@@ -39,10 +39,20 @@ export default function MainPage() {
         const response = await checkPincodeStatus(pinCode, sid);
         if (response.isPossible) {
           const status = response.gameStatus;
-          const path = mappingGameStatus(status, pinCode);
-          navigate(path);
+          if (!status) {
+            deleteCookie('sid');
+            navigate(`/nickname/${pinCode}`);
+          } else {
+            const path = mappingGameStatus(status, pinCode);
+            navigate(path);
+          }
         } else {
-          toast.info('게임이 종료되었습니다.');
+          if (response.message) {
+            toast.info(response.message);
+          } else {
+            toast.info('게임이 종료되었습니다.');
+          }
+          deleteCookie('sid');
         }
       } else {
         const checkResponse = await checkPincodePossible(pinCode);

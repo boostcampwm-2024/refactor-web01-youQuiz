@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Copy, Users, PlayCircle } from 'lucide-react';
+import { Copy, Users, PlayCircle, LogOut } from 'lucide-react';
 
 import { getQuizSocket } from '@/shared/utils/socket';
 import { getCookie } from '@/shared/utils/cookie';
@@ -12,11 +12,14 @@ import MasterChat from './ui/MasterChat';
 import { clearLocalStorage } from '@/shared/utils/clearLocalStorage';
 import { GUEST_LOCAL_STORAGE_KEYS } from '@/shared/constants/guestLocalStorageKey';
 import { MASTER_LOCAL_STORAGE_KEYS } from '@/shared/constants/masterLocalStorageKey';
+import Modal from '@/shared/ui/modal';
+import ExitModal from './ui/ExitModal';
 
 export interface Guest {
   nickname: string;
   character: number;
   position: number;
+  connection: string;
 }
 
 export default function QuizWaitLazyPage() {
@@ -27,6 +30,7 @@ export default function QuizWaitLazyPage() {
     refetch,
   } = useNickname(socket, pinCode ?? '', getCookie('sid') ?? '');
   const [userType, setUserType] = useState<string>('');
+  const [openModal, setOpenModal] = useState(false);
 
   const guestLink = `${import.meta.env.VITE_CLIENT_URL}/nickname/${pinCode}`;
   const toast = toastController();
@@ -109,7 +113,7 @@ export default function QuizWaitLazyPage() {
           </div>
           <UserGridView guests={participantList} myPosition={myPosition} />
         </div>
-        {userType === 'master' && (
+        {userType === 'master' ? (
           <div className="relative flex justify-end min-w-full">
             <MasterChat pinCode={pinCode ?? ''} />
             <button
@@ -120,6 +124,28 @@ export default function QuizWaitLazyPage() {
               퀴즈 시작하기
             </button>
           </div>
+        ) : (
+          <div className="flex justify-end min-w-full">
+            <button
+              className="flex items-center px-4 py-2 text-lg font-medium text-gray-600 
+                  bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 
+                   hover:text-gray-900 hover:border-gray-300 transition-all duration-200 ease-in-out
+                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+              onClick={() => setOpenModal(true)}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              나가기
+            </button>
+          </div>
+        )}
+        {openModal && (
+          <Modal onClose={() => setOpenModal(false)}>
+            <ExitModal
+              onClose={() => setOpenModal(false)}
+              pinCode={pinCode ?? ''}
+              socket={socket}
+            />
+          </Modal>
         )}
       </div>
     </div>
