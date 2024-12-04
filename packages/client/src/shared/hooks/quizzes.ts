@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createQuiz } from '../api/quizzes';
 import { QuizData } from '@/pages/quiz-create';
 import { toastController } from '@/features/toast/model/toastController';
@@ -16,10 +16,14 @@ interface CreateQuizParams {
 export const useCreateQuiz = () => {
   const toast = toastController();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ['quiz'],
     mutationFn: ({ quizData, classId }: CreateQuizParams) => createQuiz(quizData, classId),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['classes'],
+      });
       navigate('/quiz-list');
       toast.success('퀴즈가 생성되었습니다.');
     },
