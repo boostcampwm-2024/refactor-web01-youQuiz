@@ -31,7 +31,7 @@ export default function Nickname() {
         navigate(`/`);
         return;
       }
-      setCookie('sid', sid);
+      setCookie('sid', sid, 30);
       socket.emit('participant notice', { pinCode: pinCode });
       navigate(`/quiz/wait/${pinCode}`);
     } catch (error) {

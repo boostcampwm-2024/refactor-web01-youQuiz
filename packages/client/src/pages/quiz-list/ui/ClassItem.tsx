@@ -38,7 +38,7 @@ export default function ClassItem({ index, quizList }: ClassItemProps) {
     socket.emit('master entry', { classId: id });
 
     const sid = await waitForSocketEvent('session', socket);
-    setCookie('sid', sid);
+    setCookie('sid', sid, 30);
 
     const pinCode = await waitForSocketEvent('pincode', socket);
 

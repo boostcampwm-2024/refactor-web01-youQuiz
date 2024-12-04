@@ -27,7 +27,7 @@ export const useSocket = () => {
 
     if (!sid) {
       socketRef.current.on('session', (sid: string) => {
-        setCookie('sid', sid);
+        setCookie('sid', sid, 30);
       });
     }
 
