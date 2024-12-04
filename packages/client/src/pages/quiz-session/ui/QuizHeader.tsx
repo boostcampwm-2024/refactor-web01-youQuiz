@@ -11,7 +11,7 @@ import RabbitImage from '@/shared/assets/characters/토끼.png';
 import PenguinImage from '@/shared/assets/characters/펭귄.png';
 import HamsterImage from '@/shared/assets/characters/햄스터.png';
 import { Calendar, Clock, Users } from 'lucide-react';
-import { QueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 // import ProgressBar from './ProgressBar';
 
@@ -43,7 +43,7 @@ export default function QuizHeader({
   const socket = getQuizSocket();
   const { data: myInfo } = useGetMyInfo({ socket });
   const { nickname, character } = myInfo;
-  const queryClient = new QueryClient();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const intervalId = setInterval(() => {
