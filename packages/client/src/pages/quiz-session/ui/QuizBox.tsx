@@ -136,9 +136,9 @@ export default function QuizBox({
               .map((choice, idx) => (
                 <button
                   key={choice.id}
-                  onClick={() => handleSelectAnswer(idx)}
+                  onClick={() => handleSelectAnswer(choice.position)}
                   className={`w-full p-4 text-left rounded-xl border transition-all ${
-                    selectedAnswer.includes(idx)
+                    selectedAnswer.includes(choice.position)
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-blue-200'
                   }`}
