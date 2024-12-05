@@ -526,8 +526,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   matchingAnswer(selectedAnswer: Number[], currentChoicesData) {
     const correctAnswers = currentChoicesData
-      .map((choice, index) => (choice.isCorrect ? index : null))
+      .map((choice) => (choice.isCorrect ? choice.position : null))
       .filter((index) => index !== null);
+
+    console.log('correctAnswers : ', correctAnswers);
+    console.log('selectedAnswer : ', selectedAnswer);
 
     const equals = (a: Number[], b: Number[]) =>
       a.length === b.length && a.every((v, i) => v === b[i]);
