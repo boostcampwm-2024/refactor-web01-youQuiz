@@ -382,7 +382,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const { classId, currentOrder, participantList } = gameInfo;
     const quizData = JSON.parse(await this.redisService.get(`classId=${classId}`));
-    const currentQuizData = quizData[currentOrder];
+    const currentQuizData = quizData.find((quiz) => quiz.position === currentOrder);
 
     const participantLength = participantList.length;
 
@@ -525,9 +525,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   matchingAnswer(selectedAnswer: Number[], currentChoicesData) {
+    console.log('currentChoicesData : ', currentChoicesData);
     const correctAnswers = currentChoicesData
-      .map((choice) => (choice.isCorrect ? choice.position : null))
-      .filter((index) => index !== null);
+      .filter((choice) => choice.isCorrect)
+      .map((choice) => choice.position);
 
     console.log('correctAnswers : ', correctAnswers);
     console.log('selectedAnswer : ', selectedAnswer);
