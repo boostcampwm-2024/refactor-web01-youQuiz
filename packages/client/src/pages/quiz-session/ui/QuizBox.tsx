@@ -131,20 +131,22 @@ export default function QuizBox({
           </div>
           {/* 선택지 */}
           <div className="space-y-4">
-            {quiz?.choices.map((choice, idx) => (
-              <button
-                key={choice.id}
-                onClick={() => handleSelectAnswer(idx)}
-                className={`w-full p-4 text-left rounded-xl border transition-all ${
-                  selectedAnswer.includes(idx)
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-200'
-                }`}
-              >
-                <span className="font-medium mr-3">{String.fromCharCode(65 + idx)}.</span>
-                {choice.content}
-              </button>
-            ))}
+            {quiz?.choices
+              .sort((a, b) => a.position - b.position)
+              .map((choice, idx) => (
+                <button
+                  key={choice.id}
+                  onClick={() => handleSelectAnswer(idx)}
+                  className={`w-full p-4 text-left rounded-xl border transition-all ${
+                    selectedAnswer.includes(idx)
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-200'
+                  }`}
+                >
+                  <span className="font-medium mr-3">{String.fromCharCode(65 + idx)}.</span>
+                  {choice.content}
+                </button>
+              ))}
           </div>
         </div>
 
