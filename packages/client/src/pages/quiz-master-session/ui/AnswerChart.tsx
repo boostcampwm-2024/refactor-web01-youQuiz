@@ -29,11 +29,13 @@ const calculateTickCount = (maxValue: number): number => {
 };
 
 export default function AnswerGraph({ answerStats, quizData, totalParticipants }: AnswerStatProps) {
-  const answerStatsArray = quizData.choices.map((choice, index) => ({
-    answer: `${index + 1}번: ${choice.content} ${choice.isCorrect ? '(정답)' : ''}`,
-    count: answerStats[index] || 0,
-    isCorrect: choice.isCorrect,
-  }));
+  const answerStatsArray = quizData.choices
+    .sort((a, b) => a.position - b.position)
+    .map((choice, index) => ({
+      answer: `${index + 1}번: ${choice.content} ${choice.isCorrect ? '(정답)' : ''}`,
+      count: answerStats[index] || 0,
+      isCorrect: choice.isCorrect,
+    }));
   const tickCount = calculateTickCount(totalParticipants);
 
   return (
