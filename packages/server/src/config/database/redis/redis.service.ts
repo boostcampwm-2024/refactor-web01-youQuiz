@@ -19,7 +19,13 @@ export class RedisService {
   }
 
   async get(key: string) {
-    return await this.redis.get(key);
+    try {
+      const data = await this.redis.get(key);
+      return data;
+    } catch (error) {
+      console.log('error happened but i can handle it');
+      return null;
+    }
   }
 
   async del(key: string) {

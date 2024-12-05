@@ -86,7 +86,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
-    const { sid } = JSON.parse(await this.redisService.get(`${client.id}`));
+    const data = JSON.parse(await this.redisService.get(`${client.id}`));
+    if (!data) {
+      return;
+    }
+    const { sid } = data;
     if (!sid) {
       return;
     }
