@@ -77,7 +77,7 @@ export default function Statistics({
           totalParticipants={totalParticipants}
           quizData={quizData}
         />
-        <div className="flex flex-col gap-2 max-h-full">
+        <div className="flex flex-col gap-2 max-h-[calc(100vh-300px)]">
           <RecentSubmittedAnswers
             userSubmitHistory={masterStatistics.submitHistory}
             history={history}
