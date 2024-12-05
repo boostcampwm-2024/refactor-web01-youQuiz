@@ -264,6 +264,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const gameInfo = JSON.parse(await this.redisService.get(`gameId=${pinCode}`));
 
     const sidType = await this.gameService.checkSidType(sid);
+    if (!sidType) {
+      return;
+    }
     const key = sidType.type === 'master' ? `master_sid=${sid}` : `participant_sid=${sid}`;
 
     const data = JSON.parse(await this.redisService.get(key));
@@ -582,6 +585,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleMyInfo(client: Socket, payload: any) {
     const { sid } = payload;
     const sidType = await this.gameService.checkSidType(sid);
+    if (!sidType) {
+      return;
+    }
     const key = sidType.type === 'master' ? `master_sid=${sid}` : `participant_sid=${sid}`;
 
     const { nickname, character } = JSON.parse(await this.redisService.get(key));
