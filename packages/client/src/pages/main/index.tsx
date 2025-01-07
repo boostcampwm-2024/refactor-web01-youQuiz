@@ -1,76 +1,42 @@
 import { toastController } from '@/features/toast/model/toastController';
-import { getPincodeExist, checkPincodePossible, checkPincodeStatus } from '@/shared/api/games';
+import { getPincodeExist } from '@/shared/api/games';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import FloatingSquare from './ui/FloatingSquare';
-import FloatingQuestion from './ui/FloatingQuestion';
-import { getCookie, deleteCookie } from '@/shared/utils/cookie';
-
-const mappingGameStatus = (status: string, pinCode: string) => {
-  switch (status) {
-    case 'WAITING':
-      return `/quiz/wait/${pinCode}`;
-    case 'IN PROGRESS':
-      return `/quiz/session/${pinCode}/1`;
-    case 'LEADERBOARD':
-      return `/quiz/session/${pinCode}/end`;
-    case 'END':
-      return `/quiz/session/${pinCode}/end`;
-    default:
-      return '/';
-  }
-};
+import { getCookie } from '@/shared/utils/cookie';
+import { useCheckPincodeStatus } from './hooks/useCheckPincodeStatus';
+import { useCheckPincodePossible } from './hooks/useCheckPincodePossible';
+import MainPageBackground from './ui/MainPageBackground';
 
 export default function MainPage() {
   const [pinCode, setPinCode] = useState<string>('');
   const navigate = useNavigate();
   const toast = toastController();
+  const { navigateBasedOnGameStatus } = useCheckPincodeStatus();
+  const { navigateIfRoomAvailable } = useCheckPincodePossible();
 
-  const handleClick = async () => {
+  const handleQuizJoin = async () => {
     if (!pinCode) {
       toast.warning('코드를 입력해주세요.');
       return;
     }
-    const response = await getPincodeExist(pinCode);
 
-    if (response.isExist) {
-      const sid = getCookie('sid');
-      if (sid) {
-        const response = await checkPincodeStatus(pinCode, sid);
-        if (response.isPossible) {
-          const status = response.gameStatus;
-          if (!status) {
-            deleteCookie('sid');
-            navigate(`/nickname/${pinCode}`);
-          } else {
-            const path = mappingGameStatus(status, pinCode);
-            navigate(path);
-          }
-        } else {
-          if (response.message) {
-            toast.info(response.message);
-          } else {
-            toast.info('게임이 종료되었습니다.');
-          }
-          deleteCookie('sid');
-        }
-      } else {
-        const checkResponse = await checkPincodePossible(pinCode);
-        console.log(checkResponse);
-        if (checkResponse.isPossible) {
-          navigate(`/nickname/${pinCode}`);
-        } else {
-          toast.warning('방이 가득 찼습니다.');
-        }
-      }
+    const response = await getPincodeExist(pinCode);
+    if (!response.isExist) {
+      toast.warning('잘못된 코드입니다.');
       return;
     }
-    toast.error('잘못된 코드입니다.');
+
+    const sid = getCookie('sid');
+    if (!sid) {
+      await navigateIfRoomAvailable(pinCode, navigate);
+      return;
+    }
+    await navigateBasedOnGameStatus(pinCode, sid, navigate);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleClick();
+      handleQuizJoin();
     }
   };
 
@@ -79,31 +45,7 @@ export default function MainPage() {
   };
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-blue-100 flex flex-col items-center justify-center p-8 overflow-hidden">
-      <FloatingSquare
-        color="from-yellow-300/80 to-yellow-400/80"
-        size="128"
-        position="top-20 left-[20%]"
-        delay={0}
-      />
-      <FloatingSquare
-        color="from-green-300/80 to-green-400/80"
-        size="160"
-        position="top-40 right-[20%]"
-        delay={0.5}
-      />
-      <FloatingSquare
-        color="from-blue-400/80 to-blue-500/80"
-        size="192"
-        position="bottom-20 left-[20%]"
-        delay={1}
-      />
-      <FloatingSquare
-        color="from-pink-300/80 to-pink-400/80"
-        size="144"
-        position="bottom-40 right-[20%]"
-        delay={1.5}
-      />
-      <FloatingQuestion position="top-[170px] right-1/3" delay={0} />
+      <MainPageBackground />
       <div className="text-center mb-12 z-10">
         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-500 via-sky-500 to-blue-600 text-transparent bg-clip-text mb-4">
           You Quiz
@@ -122,7 +64,7 @@ export default function MainPage() {
           />
           <button
             className={`h-14 px-8 bg-gradient-to-r from-blue-500 to-sky-500 ${pinCode ? 'hover:from-blue-600 hover:to-sky-600' : ''}  rounded-xl text-white shadow-lg shadow-blue-500/30 cursor-pointer`}
-            onClick={handleClick}
+            onClick={handleQuizJoin}
           >
             퀴즈 참가하기
           </button>
