@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react';
+import { useState, forwardRef, useEffect } from 'react';
 import SubmitIcon from '@/shared/assets/icons/arrow-up-circle.svg?react';
 
 interface InputBoxProps {
@@ -34,6 +34,10 @@ export default forwardRef(function InputBox(
     }
     onKeyDown?.(e);
   };
+
+  useEffect(() => {
+    setValue(initialValue ?? '');
+  }, [initialValue]);
 
   return (
     <div className="relative">
