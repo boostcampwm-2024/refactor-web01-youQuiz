@@ -1,4 +1,4 @@
-import { Ranking } from '..';
+import { Ranking } from '../index.lazy';
 
 interface PlayerListProps {
   players: Ranking[];
