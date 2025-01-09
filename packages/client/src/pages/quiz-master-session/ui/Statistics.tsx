@@ -1,12 +1,13 @@
-import AnswerGraph from './AnswerChart';
-import RecentSubmittedAnswers from './RecentSubmittedAnswers';
-import StatisticsGroup from './StatisticsGroup';
-import EmojiChart from './EmojiChart';
 import { useEffect } from 'react';
-import { MasterStatisticsResponse } from '@youquiz/shared/interfaces/response/master-statistics.response.interface';
-import { getQuizSocket } from '@/shared/utils/socket';
+
+import AnswerGraph from './AnswerChart';
+import StatisticsGroup from './StatisticsGroup';
+import StatisticsLayout from './StatisticsLayout';
+import RightPanel from './RightPanel';
 
 import { useStatisticsState } from '../hooks/useStatisticsState';
+import { getQuizSocket } from '@/shared/utils/socket';
+import { MasterStatisticsResponse } from '@youquiz/shared/interfaces/response/master-statistics.response.interface';
 
 interface StatisticsProps {
   quizData: QuizData;
@@ -52,21 +53,19 @@ export default function Statistics({
   return (
     <>
       <StatisticsGroup participantStatistics={masterStatistics} />
-      <div className="grid grid-cols-[3fr_1fr] gap-4 mx-5 h-[calc(100vh-300px)]">
+      <StatisticsLayout>
         <AnswerGraph
           answerStats={masterStatistics.choiceStatus}
           totalParticipants={totalParticipants}
           quizData={quizData}
         />
-        <div className="flex flex-col gap-2 max-h-[calc(100vh-300px)]">
-          <RecentSubmittedAnswers
-            userSubmitHistory={masterStatistics.submitHistory}
-            history={history}
-            setHistory={setHistory}
-          />
-          <EmojiChart reactionStats={reactionStats} />
-        </div>
-      </div>
+        <RightPanel
+          masterStatistics={masterStatistics}
+          history={history}
+          setHistory={setHistory}
+          reactionStats={reactionStats}
+        />
+      </StatisticsLayout>
     </>
   );
 }
