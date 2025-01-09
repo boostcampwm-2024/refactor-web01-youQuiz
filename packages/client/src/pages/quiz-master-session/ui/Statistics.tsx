@@ -1,5 +1,3 @@
-import { INITIAL_MASTER_STATISTICS } from '@/shared/constants/initialState';
-import { INITIAL_EMOJI } from '@/shared/constants/initialState';
 import AnswerGraph from './AnswerChart';
 import RecentSubmittedAnswers from './RecentSubmittedAnswers';
 import StatisticsGroup from './StatisticsGroup';
@@ -7,20 +5,14 @@ import EmojiChart from './EmojiChart';
 import { useEffect } from 'react';
 import { MasterStatisticsResponse } from '@youquiz/shared/interfaces/response/master-statistics.response.interface';
 import { getQuizSocket } from '@/shared/utils/socket';
-import { usePersistState } from '@/shared/hooks/usePersistState';
+
+import { useStatisticsState } from '../hooks/useStatisticsState';
 
 interface StatisticsProps {
   quizData: QuizData;
   initializeStates: boolean;
   setInitializeStates: React.Dispatch<React.SetStateAction<boolean>>;
   totalParticipants: number;
-}
-
-interface HistoryItem {
-  user: string;
-  submitTime: number;
-  elapsedTime: number;
-  displayTime: string;
 }
 
 export default function Statistics({
@@ -30,18 +22,14 @@ export default function Statistics({
   totalParticipants,
 }: StatisticsProps) {
   const socket = getQuizSocket();
-  const [masterStatistics, setMasterStatistics] = usePersistState<MasterStatisticsResponse>(
-    'masterStatistics',
-    INITIAL_MASTER_STATISTICS,
-  );
-  const [reactionStats, setReactionStats] = usePersistState('reactionStats', INITIAL_EMOJI);
-  const [history, setHistory] = usePersistState<HistoryItem[]>('history', []);
-
-  const initializeStatistics = () => {
-    setMasterStatistics(INITIAL_MASTER_STATISTICS);
-    setReactionStats(INITIAL_EMOJI);
-    setHistory([]);
-  };
+  const {
+    masterStatistics,
+    setMasterStatistics,
+    reactionStats,
+    setReactionStats,
+    history,
+    setHistory,
+  } = useStatisticsState({ initializeStates, setInitializeStates });
 
   useEffect(() => {
     const handleMasterStatistics = (response: MasterStatisticsResponse) => {
@@ -60,13 +48,6 @@ export default function Statistics({
       socket.off('emoji', handleReactionUpdate);
     };
   }, []);
-
-  useEffect(() => {
-    if (initializeStates) {
-      initializeStatistics();
-      setInitializeStates(false);
-    }
-  }, [initializeStates]);
 
   return (
     <>
