@@ -4,14 +4,9 @@ import { usePersistState } from '@/shared/hooks/usePersistState';
 import { getQuizSocket } from '@/shared/utils/socket';
 import { useGetMyInfo } from '../model/hooks/useGetMyInfo';
 
-import DogImage from '@/shared/assets/characters/강아지.png';
-import CatImage from '@/shared/assets/characters/고양이.png';
-import PigImage from '@/shared/assets/characters/돼지.png';
-import RabbitImage from '@/shared/assets/characters/토끼.png';
-import PenguinImage from '@/shared/assets/characters/펭귄.png';
-import HamsterImage from '@/shared/assets/characters/햄스터.png';
 import { Calendar, Clock, Users } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { CHARACTER_IMAGES, CHARACTER_NAMES } from '@/shared/constants/character';
 
 import ProgressBar from './ProgressBar';
 
@@ -22,9 +17,6 @@ interface QuizHeaderProps {
   totalParticipants: number;
   pinCode: string;
 }
-
-const characters = [DogImage, CatImage, PigImage, RabbitImage, PenguinImage, HamsterImage];
-const characterNames = ['강아지', '고양이', '돼지', '토끼', '펭귄', '햄스터'];
 
 export default function QuizHeader({
   startTime,
@@ -74,8 +66,8 @@ export default function QuizHeader({
         <div className="flex justify-between">
           <div className="flex flex-col justify-center items-center p-2">
             <img
-              src={characters[character]}
-              alt={`${characterNames[character]}character`}
+              src={CHARACTER_IMAGES[character]}
+              alt={`${CHARACTER_NAMES[character]}character`}
               className="w-16 h-16 rounded-full"
             />
             <h3 className="font-lg text-gray-500">{nickname}</h3>
