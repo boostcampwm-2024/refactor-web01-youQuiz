@@ -8,21 +8,11 @@ import RightPanel from './RightPanel';
 import { useStatisticsState } from '../hooks/useStatisticsState';
 import { getQuizSocket } from '@/shared/utils/socket';
 import { MasterStatisticsResponse } from '@youquiz/shared/interfaces/response/master-statistics.response.interface';
+import { useQuizContext } from '../hooks/useQuizContext';
 
-interface StatisticsProps {
-  quizData: QuizData;
-  initializeStates: boolean;
-  setInitializeStates: React.Dispatch<React.SetStateAction<boolean>>;
-  totalParticipants: number;
-}
-
-export default function Statistics({
-  quizData,
-  initializeStates,
-  setInitializeStates,
-  totalParticipants,
-}: StatisticsProps) {
+export default function Statistics() {
   const socket = getQuizSocket();
+  const { initializeStates, setInitializeStates } = useQuizContext();
   const {
     masterStatistics,
     setMasterStatistics,
@@ -54,11 +44,7 @@ export default function Statistics({
     <>
       <StatisticsGroup participantStatistics={masterStatistics} />
       <StatisticsLayout>
-        <AnswerGraph
-          answerStats={masterStatistics.choiceStatus}
-          totalParticipants={totalParticipants}
-          quizData={quizData}
-        />
+        <AnswerGraph answerStats={masterStatistics.choiceStatus} />
         <RightPanel
           masterStatistics={masterStatistics}
           history={history}

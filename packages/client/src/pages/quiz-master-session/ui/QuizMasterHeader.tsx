@@ -1,37 +1,55 @@
-import { usePersistState } from '@/shared/hooks/usePersistState';
-import { useEffect } from 'react';
-
 import { Socket } from 'socket.io-client';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { usePersistState } from '@/shared/hooks/usePersistState';
+import { useQuizContext } from '../hooks/useQuizContext';
+import { getCookie } from '@/shared/utils/cookie';
+import { clearLocalStorage } from '@/shared/utils/clearLocalStorage';
+import { MASTER_LOCAL_STORAGE_KEYS } from '@/shared/constants/masterLocalStorageKey';
 
 interface QuizMasterHeaderProps {
-  quizData: QuizData;
-  startTime: number;
-  timeLimit: number;
-  handleNextQuiz: () => void;
   pinCode: string;
+  id: string;
   socket: Socket;
 }
 
-export default function QuizMasterHeader({
-  quizData,
-  startTime,
-  timeLimit,
-  handleNextQuiz,
-  pinCode,
-  socket,
-}: QuizMasterHeaderProps) {
-  const [remainingTime, setRemainingTime] = usePersistState('remainingTime', timeLimit);
+export default function QuizMasterHeader({ pinCode, socket, id }: QuizMasterHeaderProps) {
+  const navigate = useNavigate();
+  const { quiz, refetch, setInitializeStates } = useQuizContext();
+
+  const [remainingTime, setRemainingTime] = usePersistState(
+    'remainingTime',
+    quiz.currentQuizData.timeLimit,
+  );
+
+  const handleNextQuiz = () => {
+    if (quiz.isLast) {
+      socket.emit('end quiz', { pinCode, sid: getCookie('sid') });
+      clearLocalStorage(MASTER_LOCAL_STORAGE_KEYS);
+      navigate(`/quiz/session/${pinCode}/end`);
+      return;
+    }
+
+    socket.emitWithAck('start quiz', { pinCode, sid: getCookie('sid') }).then(() => {
+      clearLocalStorage(MASTER_LOCAL_STORAGE_KEYS);
+      navigate(`/quiz/session/host/${pinCode}/${parseInt(id as string) + 1}`);
+      refetch();
+      setInitializeStates(true);
+    });
+  };
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      const timeLeft = timeLimit - Math.floor((Date.now() - startTime) / 1000);
+      const timeLeft =
+        quiz.currentQuizData.timeLimit - Math.floor((Date.now() - quiz.startTime) / 1000);
       setRemainingTime(timeLeft);
     }, 1000);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [startTime]);
+  }, [quiz.startTime]);
 
   useEffect(() => {
     if (remainingTime === 0) {
@@ -45,7 +63,7 @@ export default function QuizMasterHeader({
         <div>
           <h1 className="text-xl font-bold mb-2">실시간 통계</h1>
           <p className="text-2xl font-bold mb-2">
-            Q{quizData.position + 1}. {quizData.content}
+            Q{quiz.currentQuizData.position + 1}. {quiz.currentQuizData.content}
           </p>
         </div>
         <div>
