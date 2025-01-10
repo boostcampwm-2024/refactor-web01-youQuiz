@@ -4,12 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Guest } from '../index.lazy';
 import { getQuizSocket } from '@/shared/utils/socket';
 
-import DogImage from '@/shared/assets/characters/강아지.png';
-import CatImage from '@/shared/assets/characters/고양이.png';
-import PigImage from '@/shared/assets/characters/돼지.png';
-import RabbitImage from '@/shared/assets/characters/토끼.png';
-import PenguinImage from '@/shared/assets/characters/펭귄.png';
-import HamsterImage from '@/shared/assets/characters/햄스터.png';
+import { CHARACTER_IMAGES, CHARACTER_NAMES } from '@/shared/constants/character';
 
 interface UserGridItemProps {
   participant: Guest;
@@ -18,8 +13,6 @@ interface UserGridItemProps {
 }
 
 const MAX_MESSAGE_LENGTH = 15;
-const characters = [DogImage, CatImage, PigImage, RabbitImage, PenguinImage, HamsterImage];
-const characterNames = ['강아지', '고양이', '돼지', '토끼', '펭귄', '햄스터'];
 
 const randomColor = [
   'bg-gradient-to-br from-blue-400/80 to-blue-500/80 text-white',
@@ -115,8 +108,8 @@ export default function UserGridItem({ participant, isMine, otherMessage }: User
         }`}
       >
         <img
-          src={characters[participant.character]}
-          alt={`${characterNames[participant.character]}character`}
+          src={CHARACTER_IMAGES[participant.character]}
+          alt={`${CHARACTER_NAMES[participant.character]}character`}
           className="w-20 h-20 rounded-full"
         />
         {!isMine && otherMessage && (

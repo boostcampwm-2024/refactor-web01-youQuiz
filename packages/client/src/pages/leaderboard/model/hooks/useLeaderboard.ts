@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { Socket } from 'socket.io-client';
 
-import { Ranking } from '../..';
+import { Ranking } from '@/pages/leaderboard/index.lazy';
 import { emitEventWithAck } from '@/shared/utils/emitEventWithAck';
 
 interface LeaderboardData {
@@ -11,7 +11,7 @@ interface LeaderboardData {
 }
 
 export const useLeaderboard = (socket: Socket, pinCode: string) => {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: ['leaderboard', pinCode],
     queryFn: () => emitEventWithAck<LeaderboardData>(socket, 'leaderboard', { pinCode }),
   });

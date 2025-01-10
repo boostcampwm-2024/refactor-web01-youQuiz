@@ -1,17 +1,9 @@
-import { Ranking } from '.';
-import DogImage from '@/shared/assets/characters/강아지.png';
-import CatImage from '@/shared/assets/characters/고양이.png';
-import PigImage from '@/shared/assets/characters/돼지.png';
-import RabbitImage from '@/shared/assets/characters/토끼.png';
-import PenguinImage from '@/shared/assets/characters/펭귄.png';
-import HamsterImage from '@/shared/assets/characters/햄스터.png';
+import { Ranking } from '../index.lazy';
+import { CHARACTER_IMAGES, CHARACTER_NAMES } from '@/shared/constants/character';
 
 interface TopPlayerProps {
   players: Ranking[];
 }
-
-const characters = [DogImage, CatImage, PigImage, RabbitImage, PenguinImage, HamsterImage];
-const characterNames = ['강아지', '고양이', '돼지', '토끼', '펭귄', '햄스터'];
 
 const Nickname = ({ nickname }: { nickname: string }) => {
   return (
@@ -25,10 +17,12 @@ export default function TopPlayer({ players }: TopPlayerProps) {
     <div className="flex justify-center items-end gap-20 p-4">
       <div className="flex flex-col items-center gap-2">
         <div className="rounded-full w-24 h-24 ">
-          <img
-            src={characters[players[1]?.character] ?? DogImage}
-            alt={`${characterNames[players[1]?.character]}character`}
-          />
+          {players[1] && (
+            <img
+              src={CHARACTER_IMAGES[players[1].character]}
+              alt={`${CHARACTER_NAMES[players[1].character]}character`}
+            />
+          )}
         </div>
         <div className="relative w-24 h-28 bg-gradient-to-t from-gray-300 to-gray-200 rounded-base">
           <span className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-2xl font-semibold text-gray-600">
@@ -37,13 +31,14 @@ export default function TopPlayer({ players }: TopPlayerProps) {
         </div>
         <Nickname nickname={players[1]?.nickname} />
       </div>
-
       <div className="flex flex-col items-center gap-2">
         <div className="rounded-full w-24 h-24 ">
-          <img
-            src={characters[players[0]?.character] ?? DogImage}
-            alt={`${characterNames[players[0]?.character]}character`}
-          />
+          {players[0] && (
+            <img
+              src={CHARACTER_IMAGES[players[0].character]}
+              alt={`${CHARACTER_NAMES[players[0].character]}character`}
+            />
+          )}
         </div>
         <div className="relative w-28 h-40 bg-gradient-to-t from-yellow-300 to-yellow-50 rounded-base">
           <span className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-2xl font-semibold text-gray-600">
@@ -52,13 +47,14 @@ export default function TopPlayer({ players }: TopPlayerProps) {
         </div>
         <Nickname nickname={players[0]?.nickname} />
       </div>
-
       <div className="flex flex-col items-center gap-2">
         <div className="rounded-full w-24 h-24 ">
-          <img
-            src={characters[players[2]?.character] ?? DogImage}
-            alt={`${characterNames[players[2]?.character]}character`}
-          />
+          {players[2] && (
+            <img
+              src={CHARACTER_IMAGES[players[2].character]}
+              alt={`${CHARACTER_NAMES[players[2].character]}character`}
+            />
+          )}
         </div>
         <div className="relative w-24 h-20 bg-gradient-to-t from-orange-300 to-orange-200 rounded-base">
           <span className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-2xl font-semibold text-gray-600">
