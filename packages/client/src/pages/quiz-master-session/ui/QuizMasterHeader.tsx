@@ -33,7 +33,7 @@ export default function QuizMasterHeader({ pinCode, socket, id }: QuizMasterHead
 
     socket.emitWithAck('start quiz', { pinCode, sid: getCookie('sid') }).then(() => {
       clearLocalStorage(MASTER_LOCAL_STORAGE_KEYS);
-      navigate(`/quiz/session/host/${pinCode}/${parseInt(id as string) + 1}`);
+      navigate(`/quiz/session/host/${pinCode}/${parseInt(id) + 1}`);
       refetch();
       setInitializeStates(true);
     });
