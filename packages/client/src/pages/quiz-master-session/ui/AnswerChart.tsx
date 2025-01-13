@@ -10,13 +10,11 @@ import {
   Cell,
 } from 'recharts';
 
+import { useQuizContext } from '../hooks/useQuizContext';
 import { MasterStatisticsResponse } from '@youquiz/shared/interfaces/response';
-import { QuizData } from '@youquiz/shared/interfaces/utils/quizdata.interface';
 
 interface AnswerStatProps {
   answerStats: MasterStatisticsResponse['choiceStatus'];
-  quizData: QuizData;
-  totalParticipants: number;
 }
 
 const calculateTickCount = (maxValue: number): number => {
@@ -28,15 +26,17 @@ const calculateTickCount = (maxValue: number): number => {
   return Math.max(divisors[Math.min(divisors.length - 1, maxTicks - 1)], 2);
 };
 
-export default function AnswerGraph({ answerStats, quizData, totalParticipants }: AnswerStatProps) {
-  const answerStatsArray = quizData.choices
+export default function AnswerGraph({ answerStats }: AnswerStatProps) {
+  const { quiz } = useQuizContext();
+
+  const answerStatsArray = quiz.currentQuizData.choices
     .sort((a, b) => a.position - b.position)
     .map((choice, index) => ({
       answer: `${index + 1}번: ${choice.content} ${choice.isCorrect ? '(정답)' : ''}`,
       count: answerStats[index] || 0,
       isCorrect: choice.isCorrect,
     }));
-  const tickCount = calculateTickCount(totalParticipants);
+  const tickCount = calculateTickCount(quiz.participantLength);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -66,7 +66,7 @@ export default function AnswerGraph({ answerStats, quizData, totalParticipants }
           axisLine={false}
           tickLine={false}
           tickCount={tickCount}
-          domain={[0, totalParticipants]}
+          domain={[0, quiz.participantLength]}
         />
         <Tooltip formatter={(value: number) => [`${value}명`, '참여자 수']} />
         <Legend formatter={() => '참여자 수'} />
