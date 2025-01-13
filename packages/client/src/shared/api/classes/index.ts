@@ -1,4 +1,4 @@
-import { QuizData } from '@/pages/quiz-create';
+import { QuizData } from '@/pages/quiz-create/contexts/quizContext.types';
 import { apiClient } from '..';
 
 interface ClassesData {

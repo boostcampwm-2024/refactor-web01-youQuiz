@@ -5,7 +5,7 @@ import { CustomButton } from '@/shared/ui/buttons';
 import { setCookie } from '@/shared/utils/cookie';
 import { getQuizSocket } from '@/shared/utils/socket';
 import { waitForSocketEvent } from '@/shared/utils/waitForSocketEvent';
-import { QuizData } from '@/pages/quiz-create';
+import { QuizData } from '@/pages/quiz-create/contexts/quizContext.types';
 import DownArrowIcon from '@/shared/assets/icons/down-arrow.svg?react';
 import BinIcon from '@/shared/assets/icons/bin.svg?react';
 import { useDeleteClass } from '@/shared/hooks/classes';
