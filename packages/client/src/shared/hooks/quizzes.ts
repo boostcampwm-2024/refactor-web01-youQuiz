@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createQuiz } from '../api/quizzes';
-import { QuizData } from '@/pages/quiz-create';
+import { QuizData } from '@/pages/quiz-create/contexts/quizContext.types';
 import { toastController } from '@/features/toast/model/toastController';
 import { useNavigate } from 'react-router-dom';
 
