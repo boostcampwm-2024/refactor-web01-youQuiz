@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-import { Choice } from '../entities/choice.entity';
-import { CreateChoiceRequestDto } from '../dto/request/create-choice.request.dto';
+import { Choice } from '../domain/entities/choice.entity';
+import { CreateChoiceRequestDto } from '../presentation/dto/request/create-choice.request.dto';
 
 @Injectable()
 export class ChoiceRepository {

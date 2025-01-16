@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
-import { Class } from '../entities/class.entity';
+import { Class } from '../domain/entities/class.entity';
 
 @Injectable()
 export class ClassRepository {

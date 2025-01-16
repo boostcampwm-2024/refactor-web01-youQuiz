@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { QuizType } from '../utils/quiz-type.enum';
+import { QuizType } from '../../utils/quiz-type.enum';
 import { Choice } from './choice.entity';
 import { Class } from './class.entity';
 

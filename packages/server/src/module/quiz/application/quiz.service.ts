@@ -1,16 +1,16 @@
 import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { DataSource, InsertResult } from 'typeorm';
-import { QuizRepository } from './repositories/quiz.repository';
-import { ChoiceRepository } from './repositories/choice.repository';
-import { ClassRepository } from './repositories/class.repository';
-import { CreateClassRequestDto } from './dto/request/create-class.request.dto';
-import { CreateClassResponseDto } from './dto/response/create-class.response.dto';
-import { CreateQuizListRequestDto } from './dto/request/create-quizlist.request.dto';
-import { QuizResponseDto } from './dto/response/quiz.response.dto';
-import { UpdateClassRequestDto } from './dto/request/update-class.request.dto';
-import { UpdateQuizListRequestDto } from './dto/request/update-quizlist.request.dto';
-import { GetClassResponseDto } from './dto/response/get-class.response.dto';
-import { Class } from './entities/class.entity';
+import { QuizRepository } from '../infrastructure/quiz.repository';
+import { ChoiceRepository } from '../infrastructure/choice.repository';
+import { ClassRepository } from '../infrastructure/class.repository';
+import { CreateClassRequestDto } from '../presentation/dto/request/create-class.request.dto';
+import { CreateClassResponseDto } from '../presentation/dto/response/create-class.response.dto';
+import { CreateQuizListRequestDto } from '../presentation/dto/request/create-quizlist.request.dto';
+import { QuizResponseDto } from '../presentation/dto/response/quiz.response.dto';
+import { UpdateClassRequestDto } from '../presentation/dto/request/update-class.request.dto';
+import { UpdateQuizListRequestDto } from '../presentation/dto/request/update-quizlist.request.dto';
+import { GetClassResponseDto } from '../presentation/dto/response/get-class.response.dto';
+import { Class } from '../domain/entities/class.entity';
 
 @Injectable()
 export class QuizService {

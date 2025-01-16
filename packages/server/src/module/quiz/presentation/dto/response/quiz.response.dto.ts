@@ -1,6 +1,6 @@
 import { QuizResponse } from '@shared/interfaces/response/quiz.response.interface';
-import { ChoiceResponseDto } from '../response/choice.response.dto';
-import { Quiz } from '../../entities/quiz.entity';
+import { ChoiceResponseDto } from './choice.response.dto';
+import { Quiz } from '../../../domain/entities/quiz.entity';
 import { Expose, Type } from 'class-transformer';
 
 export class QuizResponseDto implements QuizResponse {

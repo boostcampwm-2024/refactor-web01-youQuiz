@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { Class } from '../../entities/class.entity';
+import { Class } from '../../../domain/entities/class.entity';
 import { QuizResponseDto } from './quiz.response.dto';
 
 export class CreateClassResponseDto {

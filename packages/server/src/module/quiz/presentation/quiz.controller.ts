@@ -10,7 +10,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { QuizService } from './quiz.service';
+import { QuizService } from '../application/quiz.service';
 import { TransformInterceptor } from '../../interceptors/transform.interceptor';
 import { ResponseDto } from '../../utils/dto/response.dto';
 import { CreateClassRequestDto } from './dto/request/create-class.request.dto';

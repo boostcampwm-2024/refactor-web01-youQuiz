@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { Choice } from '../../entities/choice.entity';
+import { Choice } from '../../../domain/entities/choice.entity';
 import { ChoiceResponse } from '@shared/interfaces/response/choice.response.interface';
 
 export class ChoiceResponseDto implements ChoiceResponse {

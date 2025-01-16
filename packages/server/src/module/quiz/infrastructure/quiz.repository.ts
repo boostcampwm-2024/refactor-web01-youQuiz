@@ -1,10 +1,10 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
-import { Quiz } from '../entities/quiz.entity';
-import { Choice } from '../entities/choice.entity';
-import { CreateQuizRequestDto } from '../dto/request/create-quiz.request.dto';
-import { UpdateQuizRequestDto } from '../dto/request/update-quiz.request.dto';
+import { Quiz } from '../domain/entities/quiz.entity';
+import { Choice } from '../domain/entities/choice.entity';
+import { CreateQuizRequestDto } from '../presentation/dto/request/create-quiz.request.dto';
+import { UpdateQuizRequestDto } from '../presentation/dto/request/update-quiz.request.dto';
 
 @Injectable()
 export class QuizRepository {
