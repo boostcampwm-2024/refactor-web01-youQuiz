@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ChoiceRepository } from '../../quiz/quizzes/repositories/choice.repository';
-import { ClassRepository } from '../../quiz/quizzes/repositories/class.repository';
-import { QuizRepository } from '../../quiz/quizzes/repositories/quiz.repository';
+import { ChoiceRepository } from '../../quiz/infrastructure/choice.repository';
+import { ClassRepository } from '../../quiz/infrastructure/class.repository';
+import { QuizRepository } from '../../quiz/infrastructure/quiz.repository';
 import { RedisService } from '../../../config/database/redis/redis.service';
-import { Quiz } from 'src/module/quiz/quizzes/entities/quiz.entity';
+import { Quiz } from 'src/module/quiz/domain/entities/quiz.entity';
 import { PARTICIPANT_MAX_NUMBER } from '@shared/constants/game.constants';
 import { GAMESTATUS_TYPES } from '@shared/types/gameStatus.types';
 
