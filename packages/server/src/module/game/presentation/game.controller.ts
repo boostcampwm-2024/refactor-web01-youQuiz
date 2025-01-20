@@ -1,5 +1,5 @@
 import { Controller, Get, Param, UsePipes, ValidationPipe } from '@nestjs/common';
-import { GameService } from './game.service';
+import { GameService } from '../application/game.service';
 
 @Controller('api')
 export class GameController {
@@ -22,6 +22,7 @@ export class GameController {
   async checkAccumulation(@Param('pinCode') pinCode: string) {
     return await this.gameService.checkAccumulation(pinCode);
   }
+
   @Get('games/:pinCode/sid/:sid/status')
   async checkGameStatus(@Param('sid') sid: string, @Param('pinCode') pinCode: string) {
     return await this.gameService.checkGameStatus(sid, pinCode);
