@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import { Socket } from 'socket.io-client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import { useLeaderboard } from '@/pages/leaderboard/model/hooks/useLeaderboard';
 import { emitEventWithAck } from '@/shared/utils/emitEventWithAck';
@@ -119,6 +120,35 @@ describe('useLeaderboard Custom Hook Test', () => {
 
     await waitFor(() => {
       expect(screen.getByText('95')).toBeInTheDocument();
+    });
+  });
+
+  it('에러가 발생하면 ErrorBoundary 화면을 보여준다.', async () => {
+    const pinCode = '123456';
+    const TestComponent = () => {
+      const { data } = useLeaderboard(mockSocket, pinCode);
+      return <div>{data.averageScore}</div>;
+    };
+    const Wrapper = ({ children }: { children: React.ReactNode }) => {
+      return (
+        <QueryClientProvider client={queryClient}>
+          <ErrorBoundary fallback={'에러 발생'}>
+            <Suspense fallback={<QuizLoading />}>{children}</Suspense>
+          </ErrorBoundary>
+        </QueryClientProvider>
+      );
+    };
+
+    (emitEventWithAck as jest.Mock).mockRejectedValue(new Error('에러 발생'));
+
+    render(
+      <Wrapper>
+        <TestComponent />
+      </Wrapper>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('에러 발생')).toBeInTheDocument();
     });
   });
 });
