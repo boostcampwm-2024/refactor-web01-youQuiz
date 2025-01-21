@@ -18,6 +18,5 @@ export enum GameEvents {
   LEADERBOARD = 'leaderboard',
   MESSAGE = 'message',
   MY_INFO = 'my info',
-  // 클라이언트 이벤트
   PINCODE = 'pincode',
 }
