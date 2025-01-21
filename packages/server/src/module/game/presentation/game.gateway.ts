@@ -18,7 +18,7 @@ import { EndQuizRequestDto } from './dto/request/end-quiz.request.dto';
 import { MessageRequestDto } from './dto/request/message.request.dto';
 import { LeaderboardRequestDto } from './dto/request/leaderboard.request.dto';
 import { GAMESTATUS_TYPES } from '@shared/types/gameStatus.types';
-import { GameEvents } from '../constants/game-events.enum';
+import { GameEvents } from '@shared/constants/game-events.enum';
 
 @Injectable()
 @WebSocketGateway({
