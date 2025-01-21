@@ -61,13 +61,14 @@ export default class Tester {
       });
     };
 
-    for (let i = 0; i < messageCount; i++) {
+    Array.from({ length: messageCount }).forEach(async () => {
       const latency = await pingPong();
       results.samples.push(latency);
       results.average += latency / messageCount;
       results.min = Math.min(results.min, latency);
       results.max = Math.max(results.max, latency);
-    }
+    });
+
     console.log('Latency Test Average Latency: ', results.average);
     console.log('Latency Test Min Latency: ', results.min);
     console.log('Latency Test Max Latency: ', results.max);
@@ -114,13 +115,13 @@ export default class Tester {
         };
       }
 
-      for (let i = 0; i < totalMessages; i++) {
+      Array.from({ length: totalMessages }).forEach(() => {
         if (type === 'socket-io') {
           this.socketObject.emit(messageType, message);
         } else {
           this.socketObject.send(message);
         }
-      }
+      });
     });
   }
 }
