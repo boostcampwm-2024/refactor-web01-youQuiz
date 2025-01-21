@@ -1,0 +1,30 @@
+config:
+  target: 'ws://localhost:3000/game' # ✅ 서버의 WebSocket 주소 추가
+  phases:
+    - duration: 10
+      arrivalRate: 5 # 초당 5명 접속
+  engines:
+    socketio: {}
+
+scenarios:
+  - name: 'Host Creates Room'
+    flow:
+      - emit:
+          channel: 'master entry'
+          data:
+            classId: 123
+      - think: 2
+      - capture:
+          json: '$'
+          as: 'response'
+      - log: '🔹 Master Entry Response: {{ response }}'
+
+  - name: 'Participants Join'
+    flow:
+      - think: 3
+      - emit:
+          channel: 'session'
+          data:
+            pinCode: '{{ response.pincode }}' # ✅ master entry 응답값 사용
+            nickname: 'User-{{ $loopCount }}'
+      - log: '✅ Participant Joined with pinCode: {{ response.pincode }}'

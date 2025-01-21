@@ -1,0 +1,29 @@
+config:
+  target: 'http://localhost:3000' # 실제 Socket.io 서버 주소
+  phases:
+    - duration: 60 # 60초 동안 테스트 진행
+      arrivalRate: 10 # 초당 10명의 사용자 추가
+  payload:
+    path: 'users.csv'
+    fields:
+      - 'user_id'
+      - 'username'
+
+scenarios:
+  - name: 'Socket.IO Connection Test'
+    engine: 'socketio'
+    flow:
+      - connect:
+          namespace: '/'
+      - emit:
+          channel: 'join-room'
+          data:
+            roomId: 'test-room'
+            userId: '{{ user_id }}'
+      - think: 5
+      - emit:
+          channel: 'send-message'
+          data:
+            message: 'Hello, this is a test message!'
+      - think: 5
+      - disconnect: true

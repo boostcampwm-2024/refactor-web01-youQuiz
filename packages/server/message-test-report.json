@@ -1,0 +1,55 @@
+{
+  "aggregate": {
+    "counters": {
+      "vusers.created_by_name.Host Creates Room": 30,
+      "vusers.created": 50,
+      "errors.an URL must be specified": 50,
+      "vusers.failed": 50,
+      "vusers.created_by_name.Participants Join": 20
+    },
+    "rates": {},
+    "firstCounterAt": 1737392102736,
+    "lastCounterAt": 1737392114942,
+    "firstMetricAt": 1737392102736,
+    "lastMetricAt": 1737392114942,
+    "period": 1737392110000,
+    "summaries": {},
+    "histograms": {}
+  },
+  "intermediate": [
+    {
+      "counters": {
+        "vusers.created_by_name.Host Creates Room": 25,
+        "vusers.created": 40,
+        "errors.an URL must be specified": 35,
+        "vusers.failed": 35,
+        "vusers.created_by_name.Participants Join": 15
+      },
+      "rates": {},
+      "firstCounterAt": 1737392102736,
+      "lastCounterAt": 1737392109940,
+      "firstMetricAt": 1737392102736,
+      "lastMetricAt": 1737392109940,
+      "period": "1737392100000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Host Creates Room": 5,
+        "vusers.created": 10,
+        "errors.an URL must be specified": 15,
+        "vusers.failed": 15,
+        "vusers.created_by_name.Participants Join": 5
+      },
+      "rates": {},
+      "firstCounterAt": 1737392110736,
+      "lastCounterAt": 1737392114942,
+      "firstMetricAt": 1737392110736,
+      "lastMetricAt": 1737392114942,
+      "period": "1737392110000",
+      "summaries": {},
+      "histograms": {}
+    }
+  ]
+}
