@@ -6061,6 +6061,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/ws@npm:^8.5.13":
+  version: 8.5.13
+  resolution: "@types/ws@npm:8.5.13"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/a5430aa479bde588e69cb9175518d72f9338b6999e3b2ae16fc03d3bdcff8347e486dc031e4ed14601260463c07e1f9a0d7511dfc653712b047c439c680b0b34
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.3
   resolution: "@types/yargs-parser@npm:21.0.3"
@@ -15638,6 +15647,7 @@ __metadata:
     "@types/joi": "npm:^17.2.3"
     "@types/node": "npm:^22.8.7"
     "@types/supertest": "npm:^6.0.2"
+    "@types/ws": "npm:^8.5.13"
     artillery: "npm:^2.0.22"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.14.1"
@@ -15661,6 +15671,7 @@ __metadata:
     tsconfig-paths: "npm:^4.2.0"
     typeorm: "npm:^0.3.20"
     uuid: "npm:^11.0.3"
+    ws: "npm:^8.18.0"
   languageName: unknown
   linkType: soft
 

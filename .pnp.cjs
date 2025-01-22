@@ -8911,6 +8911,16 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@types/ws", [\
+      ["npm:8.5.13", {\
+        "packageLocation": "./.yarn/cache/@types-ws-npm-8.5.13-7564c96514-a5430aa479.zip/node_modules/@types/ws/",\
+        "packageDependencies": [\
+          ["@types/ws", "npm:8.5.13"],\
+          ["@types/node", "npm:22.8.7"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@types/yargs", [\
       ["npm:17.0.33", {\
         "packageLocation": "./.yarn/cache/@types-yargs-npm-17.0.33-1d6cca6a2e-d16937d7ac.zip/node_modules/@types/yargs/",\
@@ -20140,6 +20150,7 @@ const RAW_RUNTIME_STATE =
           ["@types/joi", "npm:17.2.3"],\
           ["@types/node", "npm:22.8.7"],\
           ["@types/supertest", "npm:6.0.2"],\
+          ["@types/ws", "npm:8.5.13"],\
           ["artillery", "npm:2.0.22"],\
           ["class-transformer", "npm:0.5.1"],\
           ["class-validator", "npm:0.14.1"],\
@@ -20162,7 +20173,8 @@ const RAW_RUNTIME_STATE =
           ["tsc-alias", "npm:1.8.10"],\
           ["tsconfig-paths", "npm:4.2.0"],\
           ["typeorm", "virtual:2499dbb93d824027565d71b0716c4fb8b548ad61955d0a0286bfb3c5b4058e227894b6691d96808c00f576db14870018375210362c26ee321ea99fd6ed041c74#npm:0.3.20"],\
-          ["uuid", "npm:11.0.3"]\
+          ["uuid", "npm:11.0.3"],\
+          ["ws", "virtual:4969817ecc5135e19c831a8a77fad0024bca60e22f20949b643b2a5d8feef7ab0494dd388c7ac0f710ab0f2b9bf61eada924b20db2ebe60bb58c2514d8262aa4#npm:8.18.0"]\
         ],\
         "linkType": "SOFT"\
       }]\
