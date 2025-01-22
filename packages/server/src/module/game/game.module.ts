@@ -8,18 +8,20 @@ import { GameRankingService } from './domain/services/game.ranking.service';
 import { GameStateService } from './domain/services/game.state.service';
 import { GameUserInfoService } from './domain/services/game.user-info.service';
 import { GameQuizService } from './domain/services/game.quiz.service';
+import { CustomSocketGateway } from './presentation/test.gateway';
 
 @Module({
   imports: [QuizModule, RedisModule],
   controllers: [GameController],
   providers: [
     GameGateway,
+    CustomSocketGateway,
     GameService,
     GameRankingService,
     GameStateService,
     GameUserInfoService,
     GameQuizService,
   ],
-  exports: [GameGateway, GameService],
+  exports: [CustomSocketGateway, GameGateway, GameService],
 })
 export class GameModule {}
