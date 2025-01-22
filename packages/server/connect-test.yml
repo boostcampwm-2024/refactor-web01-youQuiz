@@ -1,0 +1,28 @@
+config:
+  target: 'ws://localhost:3000/game'
+  phases:
+    - duration: 10
+      arrivalRate: 32 # 32명의 참여자
+  socketio:
+    transports: ['websocket']
+
+scenarios:
+  - name: 'Test Messages with 32 Participants'
+    engine: 'socketio'
+    flow:
+      # 1. 각 클라이언트가 'session' 이벤트를 통해 핀코드에 참여
+      - emit:
+          channel: 'session'
+          data:
+            pinCode: 'a378ad' # 고정된 pinCode
+            nickname: 'TestUser_{{ $loopIndex }}'
+      # 2. 참여자가 1초 간격으로 'message' 이벤트 발생
+      - loop:
+          - emit:
+              channel: 'message'
+              data:
+                pinCode: 'a378ad'
+                message: 'Message from User {{ $loopIndex }}'
+                position: { { $loopIndex } }
+          - think: 1 # 1초 간격으로 메시지 발생
+        count: 10 # 각 참여자가 10번 메시지 전송
