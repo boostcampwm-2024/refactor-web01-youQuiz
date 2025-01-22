@@ -4,6 +4,7 @@
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/main.ts",
     "start:dev": "nodemon --watch src --exec 'ts-node -r tsconfig-paths/register' src/main.ts",
+    "test:artillery": "artillery run message-test.yml -o message-test-report.json",
     "build": "tsc && tsc-alias",
     "test": "jest",
     "test:e2e": "jest --config ./test/jest-e2e.json"
