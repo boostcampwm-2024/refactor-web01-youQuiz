@@ -20,6 +20,7 @@ import { GetClassResponseDto } from './dto/response/get-class.response.dto';
 import { UpdateClassRequestDto } from './dto/request/update-class.request.dto';
 import { UpdateQuizListRequestDto } from './dto/request/update-quizlist.request.dto';
 import { CreateQuizWithAiDto } from './dto/request/create-quiz-with-ai.request.dto';
+import { CreateQuizWithAiGeneratedResponseDto } from './dto/response/create-quiz-with-ai-generate.response.dto';
 
 @Controller('api')
 export class QuizController {
@@ -74,5 +75,14 @@ export class QuizController {
     @Body() dto: CreateQuizWithAiDto,
   ): Promise<void> {
     return await this.quizService.createAiQuiz(classId, dto);
+  }
+
+  @Post('/classes/:classId/quizzes/ai/generate')
+  @UseInterceptors(new TransformInterceptor(CreateQuizWithAiGeneratedResponseDto))
+  async getAiQuiz(
+    @Param('classId') classId: number,
+    @Body() dto: CreateQuizWithAiDto,
+  ): Promise<CreateQuizWithAiGeneratedResponseDto> {
+    return await this.quizService.getAiQuiz(classId, dto);
   }
 }

@@ -15,6 +15,7 @@ import { Class } from '../domain/entities/class.entity';
 import { OpenAiService } from 'src/config/ai/openai.config';
 import { CreateQuizWithAiDto } from '../presentation/dto/request/create-quiz-with-ai.request.dto';
 import { create } from 'domain';
+import { CreateQuizWithAiGeneratedResponseDto } from '../presentation/dto/response/create-quiz-with-ai-generate.response.dto';
 
 @Injectable()
 export class QuizService {
@@ -25,6 +26,16 @@ export class QuizService {
     private readonly openAiService: OpenAiService,
     private readonly dataSource: DataSource,
   ) {}
+
+  async getAiQuiz(
+    classId: number,
+    request: CreateQuizWithAiDto,
+  ): Promise<CreateQuizWithAiGeneratedResponseDto> {
+    const aiGeneratedQuiz = JSON.parse(await this.openAiService.generateQuiz(request.text));
+    console.log('📌 OpenAI 응답:', JSON.stringify(aiGeneratedQuiz, null, 2));
+
+    return CreateQuizWithAiGeneratedResponseDto.fromAiResponse(aiGeneratedQuiz);
+  }
 
   async createClass(createClassRequestDto: CreateClassRequestDto): Promise<CreateClassResponseDto> {
     const classEntity = await this.classRepository.create(createClassRequestDto);
