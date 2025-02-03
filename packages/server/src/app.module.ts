@@ -7,13 +7,16 @@ import { UserModule } from './module/user/user.module';
 import { QuizModule } from './module/quiz/quiz.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { GameModule } from './module/game/game.module';
-import { RedisModule as RedisModuleTEST } from './config/database/redis/redis.module'; //
+import { RedisModule as RedisModuleTEST } from './config/database/redis/redis.module';
+import { OpenAiModule } from './config/ai/openai.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     UserModule,
     QuizModule,
     GameModule,
+    OpenAiModule,
     RedisModuleTEST,
     MysqlConfigModule,
     TypeOrmModule.forRootAsync({
