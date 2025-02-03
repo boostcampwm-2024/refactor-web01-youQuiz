@@ -1,5 +1,6 @@
 import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { DataSource, InsertResult } from 'typeorm';
+import OpenAI from 'openai';
 import { QuizRepository } from '../infrastructure/quiz.repository';
 import { ChoiceRepository } from '../infrastructure/choice.repository';
 import { ClassRepository } from '../infrastructure/class.repository';
@@ -11,6 +12,9 @@ import { UpdateClassRequestDto } from '../presentation/dto/request/update-class.
 import { UpdateQuizListRequestDto } from '../presentation/dto/request/update-quizlist.request.dto';
 import { GetClassResponseDto } from '../presentation/dto/response/get-class.response.dto';
 import { Class } from '../domain/entities/class.entity';
+import { OpenAiService } from 'src/config/ai/openai.config';
+import { CreateQuizWithAiDto } from '../presentation/dto/request/create-quiz-with-ai.request.dto';
+import { create } from 'domain';
 
 @Injectable()
 export class QuizService {
@@ -18,6 +22,7 @@ export class QuizService {
     private readonly quizRepository: QuizRepository,
     private readonly choiceRepository: ChoiceRepository,
     private readonly classRepository: ClassRepository,
+    private readonly openAiService: OpenAiService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -27,6 +32,11 @@ export class QuizService {
     const responseDto = CreateClassResponseDto.fromEntity(classEntity);
 
     return responseDto;
+  }
+
+  async createAiQuiz(classId: number, request: CreateQuizWithAiDto): Promise<void> {
+    const response = JSON.parse(await this.openAiService.generateQuiz(request.text));
+    await this.createBulkQuizWithChoices(classId, response);
   }
 
   async createBulkQuizWithChoices(
