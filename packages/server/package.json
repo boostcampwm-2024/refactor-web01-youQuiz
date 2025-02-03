@@ -29,6 +29,7 @@
     "joi": "^17.13.3",
     "moment": "^2.30.1",
     "mysql2": "^3.11.3",
+    "openai": "^4.82.0",
     "protobufjs": "^7.4.0",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
