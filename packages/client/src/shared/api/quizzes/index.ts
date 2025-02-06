@@ -14,3 +14,9 @@ export const createQuiz = async (quizData: Quizzes, classId: number): Promise<vo
     body: quizData,
   });
 };
+
+export const createAIQuiz = async (classId: number, text: string) => {
+  return apiClient.post(`/classes/${classId}/quizzes/ai/generate`, {
+    body: { text },
+  });
+}

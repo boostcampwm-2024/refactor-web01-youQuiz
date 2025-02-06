@@ -18,7 +18,7 @@ export default function QuizListLazyPage() {
         return <ClassItem key={item.id} quizList={item} index={index} />;
       })}
       {sortedClassListById.length === 0 && <EmptyQuizList />}
-      <div className="self-end ">
+      <div className="self-end flex gap-2">
         <CustomButton
           type="outline"
           label="퀴즈 만들기"

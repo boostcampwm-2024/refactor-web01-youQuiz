@@ -4,6 +4,9 @@ import { useQuizContext } from '../contexts/useQuizContext';
 import { useCreateQuiz } from '@/shared/hooks/quizzes';
 import { INITIAL_QUIZ_VALUE } from '../contexts/quizContext';
 import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import Modal from '@/shared/ui/modal';
+import AiQuizModal from '@/pages/quiz-list/ui/AiQuizModal';
 import { quizzesSchema } from '@/shared/validation/quizSchema';
 import { z } from 'zod';
 import { toastController } from '@/features/toast/model/toastController';
@@ -12,6 +15,7 @@ export default function QuizActions() {
   const { quizzes, currentQuizIndex, setQuizzes, setCurrentQuizIndex } = useQuizContext();
   const createQuizMutation = useCreateQuiz();
   const { classId } = useParams();
+  const [aiModal, setAiModal] = useState(false);
   const toast = toastController();
 
   const addNewQuiz = () => {
@@ -46,6 +50,10 @@ export default function QuizActions() {
     }
   };
 
+  const onAIModalClose = () => {
+    setAiModal(false);
+  }
+
   return (
     <div className="flex justify-between mt-10 mr-6">
       <div className="flex gap-6">
@@ -67,7 +75,21 @@ export default function QuizActions() {
           문제 삭제하기
         </button>
       </div>
-      <CustomButton label="퀴즈 발행하기" onClick={handleCreateQuiz} />
+      <div className='flex gap-2'>
+        <CustomButton
+          type="outline"
+          label="AI로 퀴즈 만들기"
+          color="primary"
+          size="md"
+          onClick={() => setAiModal(true)}
+        />
+        <CustomButton label="퀴즈 발행하기" onClick={handleCreateQuiz} />
+      </div>
+      {aiModal && (
+        <Modal onClose={() => setAiModal(false)}>
+          <AiQuizModal onClose={onAIModalClose} />
+        </Modal>
+      )}
     </div>
   );
 }

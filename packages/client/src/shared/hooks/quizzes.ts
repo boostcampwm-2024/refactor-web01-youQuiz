@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createQuiz } from '../api/quizzes';
+import { createAIQuiz, createQuiz } from '../api/quizzes';
 import { QuizData } from '@/pages/quiz-create/contexts/quizContext.types';
 import { toastController } from '@/features/toast/model/toastController';
 import { useNavigate } from 'react-router-dom';
@@ -30,3 +30,24 @@ export const useCreateQuiz = () => {
     onError: () => toast.error('퀴즈 생성에 실패했습니다.'),
   });
 };
+
+interface CreateAIQuizParams {
+  classId: number;
+  text: string;
+}
+
+export const useCreateAIQuiz = () => {
+  const toast = toastController();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['quiz', 'AI'],
+    mutationFn: ({ classId, text }: CreateAIQuizParams) => createAIQuiz(classId, text),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['classes'],
+      });
+      toast.success('AI가 자동 생성한 퀴즈가 생성되었습니다.');
+    },
+    onError: () => toast.error('AI 퀴즈 생성에 실패했습니다.'),
+  });
+}
