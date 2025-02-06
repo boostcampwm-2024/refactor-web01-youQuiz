@@ -3,6 +3,7 @@ import { LightbulbIcon } from 'lucide-react';
 import { useCreateAIQuiz } from '@/shared/hooks/quizzes';
 import { useParams } from 'react-router-dom';
 import { useQuizContext } from '@/pages/quiz-create/contexts/useQuizContext';
+import QuizLoading from '@/pages/quiz-session/ui/QuizLoading';
 
 interface AIQuizModalProps {
   onClose: () => void;
@@ -12,18 +13,22 @@ export default function AIQuizModal({ onClose }: AIQuizModalProps) {
   const { setQuizzes } = useQuizContext();
   const [prompt, setPrompt] = useState('');
   const { classId } = useParams();
-  const { mutate } = useCreateAIQuiz();
+  const { mutate, isPending } = useCreateAIQuiz();
   const handleConfirmClick = () => {
     mutate(
-      { classId: Number(classId), text: prompt},
+      { classId: Number(classId), text: prompt },
       {
         onSuccess: (data) => {
           setQuizzes(data.data.quizzes);
           onClose();
-        }
-      }
+        },
+      },
     );
   };
+
+  if (isPending) {
+    return <QuizLoading />;
+  }
 
   return (
     <form
