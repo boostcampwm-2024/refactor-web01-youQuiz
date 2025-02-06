@@ -18,7 +18,7 @@ export const apiClient = {
     sendRequest(endPoint, { ...options, method: 'DELETE' }),
 };
 
-async function sendRequest(endPoint: string, options: FetchOptions = {}, timeout: number = 10000) {
+async function sendRequest(endPoint: string, options: FetchOptions = {}, timeout: number = 60000) {
   const { headers, body, ...restOptions } = options;
 
   const abortController = new AbortController();
