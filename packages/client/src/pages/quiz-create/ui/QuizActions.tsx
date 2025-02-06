@@ -7,12 +7,16 @@ import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import Modal from '@/shared/ui/modal';
 import AiQuizModal from '@/pages/quiz-list/ui/AiQuizModal';
+import { quizzesSchema } from '@/shared/validation/quizSchema';
+import { z } from 'zod';
+import { toastController } from '@/features/toast/model/toastController';
 
 export default function QuizActions() {
   const { quizzes, currentQuizIndex, setQuizzes, setCurrentQuizIndex } = useQuizContext();
   const createQuizMutation = useCreateQuiz();
   const { classId } = useParams();
   const [aiModal, setAiModal] = useState(false);
+  const toast = toastController();
 
   const addNewQuiz = () => {
     setQuizzes((prev) => [...prev, { ...INITIAL_QUIZ_VALUE }]);
@@ -33,10 +37,17 @@ export default function QuizActions() {
   };
 
   const handleCreateQuiz = () => {
-    const quizzesData = {
-      quizzes: quizzes,
-    };
-    createQuizMutation.mutate({ quizData: quizzesData, classId: Number(classId) });
+    try {
+      quizzesSchema.parse(quizzes);
+      const quizzesData = {
+        quizzes: quizzes,
+      };
+      createQuizMutation.mutate({ quizData: quizzesData, classId: Number(classId) });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
+    }
   };
 
   const onAIModalClose = () => {
