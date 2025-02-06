@@ -1,9 +1,29 @@
 import { useState } from 'react';
 import { LightbulbIcon } from 'lucide-react';
+import { useCreateAIQuiz } from '@/shared/hooks/quizzes';
+import { useParams } from 'react-router-dom';
+import { useQuizContext } from '@/pages/quiz-create/contexts/useQuizContext';
 
-export default function AiQuizModal() {
+interface AIQuizModalProps {
+  onClose: () => void;
+}
+
+export default function AIQuizModal({ onClose }: AIQuizModalProps) {
+  const { setQuizzes } = useQuizContext();
   const [prompt, setPrompt] = useState('');
-  const handleConfirmClick = () => {};
+  const { classId } = useParams();
+  const { mutate } = useCreateAIQuiz();
+  const handleConfirmClick = () => {
+    mutate(
+      { classId: Number(classId), text: prompt},
+      {
+        onSuccess: (data) => {
+          setQuizzes(data.data.quizzes);
+          onClose();
+        }
+      }
+    );
+  };
 
   return (
     <form
@@ -41,6 +61,7 @@ export default function AiQuizModal() {
       <button
         type="submit"
         className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium flex items-center justify-center space-x-2"
+        onSubmit={handleConfirmClick}
       >
         <span>퀴즈 생성하기</span>
       </button>
