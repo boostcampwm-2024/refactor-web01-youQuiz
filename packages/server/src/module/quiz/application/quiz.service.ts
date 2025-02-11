@@ -15,7 +15,9 @@ import { Class } from '../domain/entities/class.entity';
 import { OpenAiService } from 'src/config/ai/openai.config';
 import { CreateQuizWithAiDto } from '../presentation/dto/request/create-quiz-with-ai.request.dto';
 import { create } from 'domain';
-import { CreateQuizWithAiGeneratedResponseDto } from '../presentation/dto/response/create-quiz-with-ai-generate.response.dto';
+import { CreateQuizWithAiResponseDto } from '../presentation/dto/response/create-quiz-with-ai.response.dto';
+import { CreateChoiceWithAiDto } from '../presentation/dto/request/create-choice-with-ai.request.dto';
+import { CreateChoiceWithAiResponseDto } from '../presentation/dto/response/create-chioce-with-ai.response.dto';
 
 @Injectable()
 export class QuizService {
@@ -27,27 +29,29 @@ export class QuizService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getAiQuiz(
-    classId: number,
-    request: CreateQuizWithAiDto,
-  ): Promise<CreateQuizWithAiGeneratedResponseDto> {
-    const aiGeneratedQuiz = JSON.parse(await this.openAiService.generateQuiz(request.text));
-    console.log('📌 OpenAI 응답:', JSON.stringify(aiGeneratedQuiz, null, 2));
+  async getAiQuiz(dto: CreateQuizWithAiDto): Promise<CreateQuizWithAiResponseDto> {
+    const aiGeneratedQuiz = JSON.parse(await this.openAiService.generateQuiz(dto.text));
 
-    return CreateQuizWithAiGeneratedResponseDto.fromAiResponse(aiGeneratedQuiz);
+    return CreateQuizWithAiResponseDto.fromAiResponse(aiGeneratedQuiz);
   }
 
-  async createClass(createClassRequestDto: CreateClassRequestDto): Promise<CreateClassResponseDto> {
-    const classEntity = await this.classRepository.create(createClassRequestDto);
+  async createClass(dto: CreateClassRequestDto): Promise<CreateClassResponseDto> {
+    const classEntity = await this.classRepository.create(dto);
 
     const responseDto = CreateClassResponseDto.fromEntity(classEntity);
 
     return responseDto;
   }
 
-  async createAiQuiz(classId: number, request: CreateQuizWithAiDto): Promise<void> {
-    const response = JSON.parse(await this.openAiService.generateQuiz(request.text));
+  async createAiQuiz(classId: number, dto: CreateQuizWithAiDto): Promise<void> {
+    const response = JSON.parse(await this.openAiService.generateQuiz(dto.text));
     await this.createBulkQuizWithChoices(classId, response);
+  }
+
+  async createAiChoices(dto: CreateChoiceWithAiDto): Promise<CreateChoiceWithAiResponseDto> {
+    const aiGeneratedChoice = JSON.parse(await this.openAiService.generateChoices(dto));
+
+    return CreateChoiceWithAiResponseDto.fromAiChoice(aiGeneratedChoice);
   }
 
   async createBulkQuizWithChoices(
