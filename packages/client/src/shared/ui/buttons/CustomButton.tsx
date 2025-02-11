@@ -13,6 +13,7 @@ interface CustomButtonProps {
   label: string;
   /** 버튼 클릭 이벤트 */
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  disable?: boolean;
 }
 
 const buttonStyles = {
@@ -55,11 +56,16 @@ export default function CustomButton({
   size = 'md',
   color = 'primary',
   onClick,
+  disable = false,
 }: CustomButtonProps) {
   const classes = buttonStyles[size][color][type];
 
   return (
-    <button onClick={onClick} className={`flex items-center min-w-fit ${classes}`}>
+    <button
+      onClick={onClick}
+      disabled={disable}
+      className={`flex items-center min-w-fit ${classes} ${disable && 'border-slate-400 text-slate-400 bg-slate-50 cursor-not-allowed'}`}
+    >
       {Icon && <Icon className="w-5 h-5 mr-1" />}
       <span
         className={`flex items-center font-medium leading-none ${
