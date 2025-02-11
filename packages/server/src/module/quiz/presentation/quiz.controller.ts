@@ -20,7 +20,9 @@ import { GetClassResponseDto } from './dto/response/get-class.response.dto';
 import { UpdateClassRequestDto } from './dto/request/update-class.request.dto';
 import { UpdateQuizListRequestDto } from './dto/request/update-quizlist.request.dto';
 import { CreateQuizWithAiDto } from './dto/request/create-quiz-with-ai.request.dto';
-import { CreateQuizWithAiGeneratedResponseDto } from './dto/response/create-quiz-with-ai-generate.response.dto';
+import { CreateQuizWithAiResponseDto } from './dto/response/create-quiz-with-ai.response.dto';
+import { CreateChoiceWithAiDto } from './dto/request/create-choice-with-ai.request.dto';
+import { CreateChoiceWithAiResponseDto } from './dto/response/create-chioce-with-ai.response.dto';
 
 @Controller('api')
 export class QuizController {
@@ -78,11 +80,18 @@ export class QuizController {
   }
 
   @Post('/classes/:classId/quizzes/ai/generate')
-  @UseInterceptors(new TransformInterceptor(CreateQuizWithAiGeneratedResponseDto))
+  @UseInterceptors(new TransformInterceptor(CreateQuizWithAiResponseDto))
   async getAiQuiz(
     @Param('classId') classId: number,
     @Body() dto: CreateQuizWithAiDto,
-  ): Promise<CreateQuizWithAiGeneratedResponseDto> {
-    return await this.quizService.getAiQuiz(classId, dto);
+  ): Promise<CreateQuizWithAiResponseDto> {
+    return await this.quizService.getAiQuiz(dto);
+  }
+
+  @Post('/classes/:classId/quizzes/choices/ai/generate')
+  @UseInterceptors(new TransformInterceptor(CreateChoiceWithAiResponseDto))
+  async getAiChoice(@Body() dto: CreateChoiceWithAiDto): Promise<CreateChoiceWithAiResponseDto> {
+    console.log('📌 DTO 변환 확인:', dto);
+    return await this.quizService.createAiChoices(dto);
   }
 }
