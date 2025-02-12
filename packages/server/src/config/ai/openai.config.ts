@@ -11,11 +11,11 @@ export class OpenAiService {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
 
     if (!apiKey) {
-      console.log('🚨 OpenAI API Key가 설정되지 않았습니다. .env 파일을 확인하세요.');
+      console.log('OpenAI API Key가 설정되지 않았습니다. .env 파일을 확인하세요.');
       throw new Error('Missing OpenAI API Key');
     }
 
-    console.log(`✅ OpenAI API Key Loaded: ${apiKey.substring(0, 8)}********`);
+    console.log(`OpenAI API Key Loaded: ${apiKey.substring(0, 8)}********`);
     this.openai = new OpenAI({ apiKey });
   }
 
@@ -109,6 +109,65 @@ export class OpenAiService {
       frequency_penalty: 0,
       presence_penalty: 0,
     });
+    return response.choices[0].message.content;
+  }
+
+  async generateChoices(dto): Promise<any> {
+    const { content, choices: existingChoices, difficulty, count } = dto;
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content:
+            '당신은 퀴즈 선택지를 생성하는 AI입니다. 주어진 질문과 기존 선택지를 참고하여 요청된 개수(count)만큼 새로운 오답을 추가하세요.\n\n' +
+            '📌 **입력 예시:**\n' +
+            '"질문:{질문 내용}, 주어진 선택지 JSON 객체:{기존 선택지 리스트}, 난이도:{난이도}, 만들 오답 개수:{오답 개수}"\n\n' +
+            '📌 **출력 요구사항:**\n' +
+            '1. **반드시 기존 선택지를 그대로 유지**하세요. 새로운 선택지만 추가해야 합니다.\n' +
+            '2. `choices` 배열에 기존 선택지(`existingChoices`)를 그대로 포함하고, 요청된 개수(count)만큼 **정확히 새로운 오답을 추가**하세요.\n' +
+            `3. 기존 선택지를 절대 변경하지 마세요. (현재 선택지: ${JSON.stringify(existingChoices)})\n` +
+            '4. 새로운 오답의 `position` 값은 기존 `position`에서 이어지도록 설정하세요.\n' +
+            `5. 새로운 오답은 **주어진 질문(현재 질문: ${content})과 연관된 내용**이어야 합니다. 엉뚱한 내용을 포함하지 마세요.\n` +
+            `6. 요청된 개수(${count})보다 많거나 적게 생성하지 마세요.\n\n` +
+            `7. 현재 난이도는 ${difficulty}입니다. 이를 고려하여 적절한 오답을 생성하세요.\n` +
+            '⚠️ 주어진 기존 선택지를 유지하지 않으면 오류로 간주됩니다!',
+        },
+      ],
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'quiz_response',
+          strict: true,
+          schema: {
+            type: 'object',
+            properties: {
+              choices: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    content: { type: 'string', description: '선택지의 내용' },
+                    isCorrect: { type: 'boolean', description: '정답 여부' },
+                    position: { type: 'integer', description: '선택지 순서' },
+                  },
+                  required: ['content', 'isCorrect', 'position'],
+                  additionalProperties: false,
+                },
+              },
+            },
+            required: ['choices'],
+            additionalProperties: false,
+          },
+        },
+      },
+      temperature: 1,
+      max_tokens: 2048,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    });
+
     return response.choices[0].message.content;
   }
 }
