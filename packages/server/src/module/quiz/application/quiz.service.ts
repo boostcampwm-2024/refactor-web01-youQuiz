@@ -52,12 +52,6 @@ export class QuizService {
     const aiGeneratedQuiz = JSON.parse(await this.openAiService.generateQuiz(text));
 
     // Redis에 퀴즈 데이터 저장 + 벡터 임베딩 저장 + TTL 1시간
-    await this.redisService.hsetWithExpire(
-      'quiz_data',
-      text,
-      JSON.stringify(aiGeneratedQuiz),
-      3600,
-    );
     await this.storeQuizEmbedding(text, aiGeneratedQuiz);
 
     return CreateQuizWithAiResponseDto.fromAiResponse(aiGeneratedQuiz);
@@ -193,7 +187,13 @@ export class QuizService {
 
   private async storeQuizEmbedding(text: string, quizData: any) {
     const embedding = await this.openAiService.getEmbedding(text);
-    await this.redisService.hset('quiz_embeddings', text, JSON.stringify(embedding));
-    await this.redisService.hset('quiz_data', text, JSON.stringify(quizData));
+
+    await this.redisService.hsetWithExpire(
+      'quiz_embeddings',
+      text,
+      JSON.stringify(embedding),
+      86400,
+    );
+    await this.redisService.hsetWithExpire('quiz_data', text, JSON.stringify(quizData), 172800);
   }
 }
