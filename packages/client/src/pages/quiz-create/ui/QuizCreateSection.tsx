@@ -3,7 +3,6 @@ import { Bot } from 'lucide-react';
 
 import CustomButton from '@/shared/ui/buttons/CustomButton';
 import InputBox from '@/shared/ui/input-box/InputBox';
-import AnswerBox from './AnswerBox';
 import TimeSelectBox from './TimeSelectBox';
 import PlusIcon from '@/shared/assets/icons/plus.svg?react';
 import AiSelectionModal from './AISelectionModal';
