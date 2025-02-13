@@ -18,6 +18,9 @@ import { create } from 'domain';
 import { CreateQuizWithAiResponseDto } from '../presentation/dto/response/create-quiz-with-ai.response.dto';
 import { CreateChoiceWithAiDto } from '../presentation/dto/request/create-choice-with-ai.request.dto';
 import { CreateChoiceWithAiResponseDto } from '../presentation/dto/response/create-chioce-with-ai.response.dto';
+import { RedisService } from 'src/config/database/redis/redis.service';
+import { cosineSimilarity } from '../utils/cosine-similarity';
+
 
 @Injectable()
 export class QuizService {
@@ -25,12 +28,40 @@ export class QuizService {
     private readonly quizRepository: QuizRepository,
     private readonly choiceRepository: ChoiceRepository,
     private readonly classRepository: ClassRepository,
+    private readonly redisService: RedisService,
     private readonly openAiService: OpenAiService,
     private readonly dataSource: DataSource,
   ) {}
 
   async getAiQuiz(dto: CreateQuizWithAiDto): Promise<CreateQuizWithAiResponseDto> {
-    const aiGeneratedQuiz = JSON.parse(await this.openAiService.generateQuiz(dto.text));
+    const { text } = dto;
+
+    // Redis에서 동일한 요청 캐싱 확인
+    const cachedQuiz = await this.redisService.hget('quiz_data', text);
+    if (cachedQuiz) {
+      console.log('캐싱된 퀴즈 반환');
+      return CreateQuizWithAiResponseDto.fromAiResponse(JSON.parse(cachedQuiz));
+    }
+
+    // 유사한 퀴즈가 있는지 확인 (코사인 유사도 0.9 이상이면 사용)
+    const similarQuiz = await this.findSimilarQuiz(text);
+    if (similarQuiz) {
+      console.log('유사한 퀴즈 반환');
+      return CreateQuizWithAiResponseDto.fromAiResponse(similarQuiz);
+    }
+
+    // AI 호출하여 퀴즈 생성
+    console.log('AI 호출하여 새 퀴즈 생성');
+    const aiGeneratedQuiz = JSON.parse(await this.openAiService.generateQuiz(text));
+
+    // Redis에 퀴즈 데이터 저장 + 벡터 임베딩 저장 + TTL 1시간
+    await this.redisService.hsetWithExpire(
+      'quiz_data',
+      text,
+      JSON.stringify(aiGeneratedQuiz),
+      3600,
+    );
+    await this.storeQuizEmbedding(text, aiGeneratedQuiz);
 
     return CreateQuizWithAiResponseDto.fromAiResponse(aiGeneratedQuiz);
   }
@@ -137,5 +168,35 @@ export class QuizService {
       await this.quizRepository.deleteByClassId(id, manager);
       await this.classRepository.delete(id, manager);
     });
+  }
+
+  async findSimilarQuiz(text: string): Promise<any | null> {
+    const inputEmbedding = await this.openAiService.getEmbedding(text);
+    const storedQuizzes = await this.redisService.hgetall('quiz_embeddings');
+
+    let mostSimilarQuiz = null;
+    let highestSimilarity = 0;
+
+    for (const [quizText, vectorStr] of Object.entries(storedQuizzes)) {
+      const storedVector = JSON.parse(vectorStr);
+      const similarity = cosineSimilarity(inputEmbedding, storedVector);
+
+      if (similarity > highestSimilarity) {
+        highestSimilarity = similarity;
+        mostSimilarQuiz = quizText;
+      }
+    }
+
+    if (highestSimilarity >= 0.9) {
+      return JSON.parse(await this.redisService.hget('quiz_data', mostSimilarQuiz));
+    }
+
+    return null;
+  }
+
+  private async storeQuizEmbedding(text: string, quizData: any) {
+    const embedding = await this.openAiService.getEmbedding(text);
+    await this.redisService.hset('quiz_embeddings', text, JSON.stringify(embedding));
+    await this.redisService.hset('quiz_data', text, JSON.stringify(quizData));
   }
 }

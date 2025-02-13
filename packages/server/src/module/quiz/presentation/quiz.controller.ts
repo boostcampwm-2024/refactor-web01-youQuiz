@@ -91,7 +91,6 @@ export class QuizController {
   @Post('/classes/:classId/quizzes/choices/ai/generate')
   @UseInterceptors(new TransformInterceptor(CreateChoiceWithAiResponseDto))
   async getAiChoice(@Body() dto: CreateChoiceWithAiDto): Promise<CreateChoiceWithAiResponseDto> {
-    console.log('📌 DTO 변환 확인:', dto);
     return await this.quizService.createAiChoices(dto);
   }
 }

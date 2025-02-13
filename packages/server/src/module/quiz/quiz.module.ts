@@ -10,9 +10,10 @@ import { QuizService } from './application/quiz.service';
 import { QuizController } from './presentation/quiz.controller';
 import { OpenAiService } from 'src/config/ai/openai.config';
 import { OpenAiModule } from 'src/config/ai/openai.module';
+import { RedisModule } from '../../config/database/redis/redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Quiz, Choice, Class]), OpenAiModule],
+  imports: [TypeOrmModule.forFeature([Quiz, Choice, Class]), RedisModule, OpenAiModule],
   controllers: [QuizController],
   providers: [QuizService, QuizRepository, ChoiceRepository, ClassRepository, OpenAiService],
   exports: [QuizRepository, ChoiceRepository, ClassRepository],
