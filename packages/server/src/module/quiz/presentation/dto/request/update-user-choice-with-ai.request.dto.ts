@@ -1,12 +1,11 @@
 import { IsNotEmpty, IsString, IsBoolean, IsNumber } from 'class-validator';
 
-export class CreateChoiceRequestDto {
+export class UpdateUserChoiceWithAiRequestDto {
   @IsNumber()
   @IsNotEmpty()
   position: number;
 
   @IsString()
-  @IsNotEmpty()
   content: string;
 
   @IsBoolean()
