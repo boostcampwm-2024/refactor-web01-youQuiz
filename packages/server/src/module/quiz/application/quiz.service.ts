@@ -21,6 +21,7 @@ import { CreateChoiceWithAiResponseDto } from '../presentation/dto/response/crea
 import { RedisService } from 'src/config/database/redis/redis.service';
 import { cosineSimilarity } from '../utils/cosine-similarity';
 
+
 @Injectable()
 export class QuizService {
   constructor(
