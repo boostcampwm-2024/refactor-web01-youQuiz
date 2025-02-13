@@ -4,7 +4,7 @@ export class CreateChoiceRequestDto {
   @IsNumber()
   @IsNotEmpty()
   position: number;
-  
+
   @IsString()
   @IsNotEmpty()
   content: string;

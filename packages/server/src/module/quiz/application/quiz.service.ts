@@ -1,6 +1,5 @@
 import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { DataSource, InsertResult } from 'typeorm';
-import OpenAI from 'openai';
 import { QuizRepository } from '../infrastructure/quiz.repository';
 import { ChoiceRepository } from '../infrastructure/choice.repository';
 import { ClassRepository } from '../infrastructure/class.repository';
@@ -14,13 +13,11 @@ import { GetClassResponseDto } from '../presentation/dto/response/get-class.resp
 import { Class } from '../domain/entities/class.entity';
 import { OpenAiService } from 'src/config/ai/openai.config';
 import { CreateQuizWithAiDto } from '../presentation/dto/request/create-quiz-with-ai.request.dto';
-import { create } from 'domain';
 import { CreateQuizWithAiResponseDto } from '../presentation/dto/response/create-quiz-with-ai.response.dto';
 import { CreateChoiceWithAiDto } from '../presentation/dto/request/create-choice-with-ai.request.dto';
 import { CreateChoiceWithAiResponseDto } from '../presentation/dto/response/create-chioce-with-ai.response.dto';
 import { RedisService } from 'src/config/database/redis/redis.service';
 import { cosineSimilarity } from '../utils/cosine-similarity';
-
 
 @Injectable()
 export class QuizService {

@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsString, IsNumber, IsArray, ValidateNested, IsEnum } from 'class-validator';
 import { QUIZ_DIFFICULTY } from '@shared/constants/quiz-difficulty.enum';
-import { CreateChoiceRequestDto } from './create-choice.request.dto';
+import { UpdateUserChoiceWithAiRequestDto } from './update-user-choice-with-ai.request.dto';
 
 export class CreateChoiceWithAiDto {
   @IsString()
@@ -10,8 +10,8 @@ export class CreateChoiceWithAiDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateChoiceRequestDto)
-  choices: CreateChoiceRequestDto[];
+  @Type(() => UpdateUserChoiceWithAiRequestDto)
+  choices: UpdateUserChoiceWithAiRequestDto[];
 
   @IsEnum(QUIZ_DIFFICULTY)
   @IsNotEmpty()

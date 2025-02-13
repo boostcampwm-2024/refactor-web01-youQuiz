@@ -1,13 +1,13 @@
 import { IsArray, ValidateNested } from 'class-validator';
-import { CreateChoiceResponseDto } from './create-choice.response.dto';
 import { Expose, plainToInstance, Type } from 'class-transformer';
+import { UpdateChoiceWithAiResponseDto } from './update-user-choice-with-ai.response.dto';
 
 export class CreateChoiceWithAiResponseDto {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateChoiceResponseDto)
+  @Type(() => UpdateChoiceWithAiResponseDto)
   @Expose()
-  choices: CreateChoiceResponseDto[];
+  choices: UpdateChoiceWithAiResponseDto[];
 
   static fromAiChoice(quiz: any): CreateChoiceWithAiResponseDto {
     return plainToInstance(CreateChoiceWithAiResponseDto, quiz, {
