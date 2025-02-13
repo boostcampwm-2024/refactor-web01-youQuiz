@@ -4,23 +4,23 @@ import { useCreateAIQuiz } from '@/shared/hooks/quizzes';
 import { useParams } from 'react-router-dom';
 import { useQuizContext } from '@/pages/quiz-create/contexts/useQuizContext';
 import QuizLoading from '@/pages/quiz-session/ui/QuizLoading';
-
+import QuizResultModal from '@/pages/quiz-create/ui/QuizResultModal';
+import Modal from '@/shared/ui/modal';
 interface AIQuizModalProps {
   onClose: () => void;
 }
 
 export default function AIQuizModal({ onClose }: AIQuizModalProps) {
-  const { setQuizzes } = useQuizContext();
+  const { quizzes, setQuizzes } = useQuizContext();
   const [prompt, setPrompt] = useState('');
   const { classId } = useParams();
-  const { mutate, isPending } = useCreateAIQuiz();
+  const { mutate, isPending, isSuccess } = useCreateAIQuiz();
   const handleConfirmClick = () => {
     mutate(
       { classId: Number(classId), text: prompt },
       {
         onSuccess: (data) => {
           setQuizzes(data.data.quizzes);
-          onClose();
         },
       },
     );
@@ -28,6 +28,14 @@ export default function AIQuizModal({ onClose }: AIQuizModalProps) {
 
   if (isPending) {
     return <QuizLoading />;
+  }
+
+  if (isSuccess) {
+    return (
+      <Modal onClose={onClose}>
+        <QuizResultModal quizzes={quizzes} onClose={onClose} onAdditionalQuery={setPrompt}/>
+      </Modal>
+    )
   }
 
   return (
