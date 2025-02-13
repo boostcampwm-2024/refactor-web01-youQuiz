@@ -32,6 +32,27 @@ export class RedisService {
     await this.redis.del(key);
   }
 
+  async hset(hashKey: string, field: string, value: string) {
+    await this.redis.hset(hashKey, field, value);
+  }
+
+  async hget(hashKey: string, field: string) {
+    return await this.redis.hget(hashKey, field);
+  }
+
+  async hgetall(hashKey: string) {
+    return await this.redis.hgetall(hashKey);
+  }
+
+  async hdel(hashKey: string, field: string) {
+    await this.redis.hdel(hashKey, field);
+  }
+
+  async hsetWithExpire(hashKey: string, field: string, value: string, expireInSeconds: number) {
+    await this.redis.hset(hashKey, field, value);
+    await this.redis.expire(hashKey, expireInSeconds);
+  }
+
   async zincrby(key: string, increment: number, member: string) {
     await this.redis.zincrby(key, increment, member);
   }
