@@ -10,6 +10,7 @@ import AiSelectionModal from './AISelectionModal';
 
 import { useQuizContext } from '../contexts/useQuizContext';
 import { QuizData } from '../contexts/quizContext.types';
+import DraggableAnswerContainer from './DraggableContainer';
 
 export default function QuizCreateSection() {
   const { quizzes, currentQuizIndex, setQuizzes } = useQuizContext();
@@ -21,6 +22,8 @@ export default function QuizCreateSection() {
   const [selectionModal, setSelectionModal] = useState(false);
   const inputValidation =
     quizData.content !== '' && quizData.choices.findIndex((e) => e.isCorrect === true) >= 0;
+
+  console.log(quizData);
 
   const onQuizUpdate = (updatedData: QuizData) => {
     setQuizzes((prev) => {
@@ -80,21 +83,13 @@ export default function QuizCreateSection() {
           />
         </div>
         <div className="flex flex-col gap-4 w-full mt-6">
-          {quizData.choices.map((choice, index) => (
-            <AnswerBox
-              key={index}
-              selected={choice.isCorrect}
-              answerSetter={() => updateChoice(index, { isCorrect: !choice.isCorrect })}
-              optionSetter={(value: string) => {
-                updateChoice(index, { content: value });
-              }}
-              inputRef={(el) => (inputRefs.current[index] = el)}
-              onKeyDown={(e) => {
-                handleKeyDown(index, e);
-              }}
-              value={choice.content}
-            />
-          ))}
+          <DraggableAnswerContainer
+            quizData={quizData}
+            updateChoice={updateChoice}
+            onQuizUpdate={onQuizUpdate}
+            inputRefs={inputRefs}
+            handleKeyDown={handleKeyDown}
+          />
         </div>
         <div className="flex gap-2 self-start mt-4">
           <CustomButton
