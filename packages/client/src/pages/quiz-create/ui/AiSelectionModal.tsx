@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Minus, Plus, Loader } from 'lucide-react';
+import { Minus, Plus, Loader, Rocket, Sparkles, Book } from 'lucide-react';
 
 import { useCreateChoices } from '@/shared/hooks/quizzes';
 import { useQuizContext } from '../contexts/useQuizContext';
@@ -28,7 +28,26 @@ interface SelectionOptionType {
   count: number;
 }
 
-const difficulty = [QUIZ_DIFFICULTY.HARD, QUIZ_DIFFICULTY.MEDIUM, QUIZ_DIFFICULTY.EASY];
+const difficulties = [
+  {
+    value: 'HARD',
+    icon: <Rocket className="w-5 h-5 mb-2" />,
+    title: '어려움',
+    description: '상위 20% 이상의 학습자를 위한 도전적인 난이도입니다.',
+  },
+  {
+    value: 'MEDIUM',
+    icon: <Sparkles className="w-5 h-5 mb-2" />,
+    title: '보통',
+    description: '대부분의 학습자가 적당한 고민과 함께 풀 수 있는 난이도입니다.',
+  },
+  {
+    value: 'EASY',
+    icon: <Book className="w-5 h-5 mb-2" />,
+    title: '쉬움',
+    description: '핵심 개념을 처음 학습하거나 복습하기에 좋은 난이도입니다.',
+  },
+];
 
 const AiSelection = ({ content, choices, onClose }: AiSelectionProps) => {
   const [selectionOption, setSelectionOption] = useState<SelectionOptionType>({
@@ -85,26 +104,41 @@ const AiSelection = ({ content, choices, onClose }: AiSelectionProps) => {
 
   return (
     <div
-      className="flex flex-col w-full max-w-2xl mx-auto p-6 shadow-lg rounded-lg bg-white space-y-6"
+      className="flex flex-col w-full max-w-xl mx-auto p-6 shadow-lg rounded-lg bg-white space-y-6"
       onClick={(e) => e.stopPropagation()}
     >
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">선택지 생성 옵션</h2>
+      <h2 className="text-xl text-center font-semibold text-gray-800 mb-4">선택지 생성 옵션</h2>
 
       <div className="grid grid-cols-3 gap-4">
-        {difficulty.map((value) => (
+        {difficulties.map(({ value, icon, title, description }) => (
           <button
             key={value}
             onClick={() => onDifficultyClick(value)}
-            className={`py-3 px-4 rounded-lg text-sm font-medium transition-colors
-              ${
-                selectionOption.difficulty === value
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-400'
-              }`}
+            className={`group relative p-4 rounded-xl transition-all duration-200 hover:shadow-md
+                ${
+                  selectionOption?.difficulty === value
+                    ? 'bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2'
+                    : 'bg-white text-gray-700 border-2 border-gray-100 hover:border-blue-200'
+                }
+              `}
           >
-            {value === 'HARD' && '어려움'}
-            {value === 'MEDIUM' && '보통'}
-            {value === 'EASY' && '쉬움'}
+            <div className="flex flex-col items-center text-center">
+              <div
+                className={`transition-colors duration-200
+                  ${selectionOption?.difficulty === value ? 'text-white' : 'text-blue-600 group-hover:text-blue-700'}
+                `}
+              >
+                {icon}
+              </div>
+              <h3 className="font-semibold mb-2">{title}</h3>
+              <p
+                className={`text-xs leading-tight
+                  ${selectionOption?.difficulty === value ? 'text-blue-50' : 'text-gray-500'}
+                `}
+              >
+                {description}
+              </p>
+            </div>
           </button>
         ))}
       </div>
