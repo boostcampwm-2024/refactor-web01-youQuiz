@@ -4,6 +4,7 @@ import { Minus, Plus, Loader } from 'lucide-react';
 
 import { useCreateChoices } from '@/shared/hooks/quizzes';
 import { useQuizContext } from '../contexts/useQuizContext';
+import { QUIZ_DIFFICULTY } from '@youquiz/shared/constants/quiz-difficulty.enum';
 import Modal from '@/shared/ui/modal';
 
 interface Choice {
@@ -23,20 +24,20 @@ interface AiSelectionProps extends AiSelectionModalProps {}
 interface SelectionOptionType {
   content: string;
   choices: Choice[];
-  difficulty: 'HARD' | 'NORMAL' | 'EASY';
+  difficulty: QUIZ_DIFFICULTY;
   count: number;
 }
 
-const difficulty = ['HARD', 'NORMAL', 'EASY'];
+const difficulty = [QUIZ_DIFFICULTY.HARD, QUIZ_DIFFICULTY.MEDIUM, QUIZ_DIFFICULTY.EASY];
 
 const AiSelection = ({ content, choices, onClose }: AiSelectionProps) => {
   const [selectionOption, setSelectionOption] = useState<SelectionOptionType>({
     content,
     choices,
-    difficulty: 'HARD',
+    difficulty: QUIZ_DIFFICULTY.MEDIUM,
     count: 3,
   });
-  const { setQuizzes } = useQuizContext();
+  const { setQuizzes, currentQuizIndex } = useQuizContext();
   const { mutate: createChoices, isPending } = useCreateChoices();
   const { classId } = useParams();
 
@@ -64,15 +65,18 @@ const AiSelection = ({ content, choices, onClose }: AiSelectionProps) => {
   };
 
   const onGenerateBtnClick = () => {
-    // API 요청
-    // 모달 닫힘
-    // 버튼에서 Loading 돌아가기
     createChoices(
       { classId, choices: selectionOption },
       {
         onSuccess: (data) => {
-          console.log(data.data);
-          setQuizzes(data.data.choices);
+          setQuizzes((prev) => {
+            const newQuizzes = [...prev];
+            newQuizzes[currentQuizIndex] = {
+              ...newQuizzes[currentQuizIndex],
+              choices: data.data.choices,
+            };
+            return newQuizzes;
+          });
           onClose();
         },
       },
@@ -99,7 +103,7 @@ const AiSelection = ({ content, choices, onClose }: AiSelectionProps) => {
               }`}
           >
             {value === 'HARD' && '어려움'}
-            {value === 'NORMAL' && '보통'}
+            {value === 'MEDIUM' && '보통'}
             {value === 'EASY' && '쉬움'}
           </button>
         ))}
@@ -141,13 +145,7 @@ const AiSelection = ({ content, choices, onClose }: AiSelectionProps) => {
             focus:ring-blue-500 focus:ring-offset-2"
           onClick={onGenerateBtnClick}
         >
-          {isPending ? (
-            <div className="animate-spin">
-              <Loader className="w-4 h-4" />
-            </div>
-          ) : (
-            '문제 생성하기'
-          )}
+          {isPending ? <Loader className="w-6 h-6 animate-spin mx-auto" /> : '문제 생성하기'}
         </button>
       </div>
     </div>
