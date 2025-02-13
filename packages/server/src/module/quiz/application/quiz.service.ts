@@ -35,25 +35,25 @@ export class QuizService {
   async getAiQuiz(dto: CreateQuizWithAiDto): Promise<CreateQuizWithAiResponseDto> {
     const { text } = dto;
 
-    // 1️⃣ Redis에서 동일한 요청 캐싱 확인
+    // Redis에서 동일한 요청 캐싱 확인
     const cachedQuiz = await this.redisService.hget('quiz_data', text);
     if (cachedQuiz) {
       console.log('캐싱된 퀴즈 반환');
       return CreateQuizWithAiResponseDto.fromAiResponse(JSON.parse(cachedQuiz));
     }
 
-    // 2️⃣ 유사한 퀴즈가 있는지 확인 (코사인 유사도 0.9 이상이면 사용)
+    // 유사한 퀴즈가 있는지 확인 (코사인 유사도 0.9 이상이면 사용)
     const similarQuiz = await this.findSimilarQuiz(text);
     if (similarQuiz) {
       console.log('유사한 퀴즈 반환');
       return CreateQuizWithAiResponseDto.fromAiResponse(similarQuiz);
     }
 
-    // 3️⃣ AI 호출하여 퀴즈 생성
+    // AI 호출하여 퀴즈 생성
     console.log('AI 호출하여 새 퀴즈 생성');
     const aiGeneratedQuiz = JSON.parse(await this.openAiService.generateQuiz(text));
 
-    // 4️⃣ Redis에 퀴즈 데이터 저장 + 벡터 임베딩 저장 (TTL 1시간)
+    // Redis에 퀴즈 데이터 저장 + 벡터 임베딩 저장 + TTL 1시간
     await this.redisService.hsetWithExpire(
       'quiz_data',
       text,
