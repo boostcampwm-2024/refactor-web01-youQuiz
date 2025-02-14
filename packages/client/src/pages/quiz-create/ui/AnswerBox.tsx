@@ -25,7 +25,7 @@ export default function AnswerBox({
   value,
 }: AnswerBoxProps) {
   return (
-    <div className="flex items-center gap-4  ">
+    <div className="flex flex-1 items-center gap-4">
       <ToggleButton
         type="check"
         isClickable
@@ -35,7 +35,7 @@ export default function AnswerBox({
       />
       <div className="flex-1">
         <InputBox
-          placeholder="선지를 입력해주세요"
+          placeholder="선택지를 입력해주세요"
           type="underline"
           ref={inputRef}
           initialValue={value}
