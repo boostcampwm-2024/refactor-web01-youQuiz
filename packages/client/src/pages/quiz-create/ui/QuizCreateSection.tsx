@@ -5,7 +5,7 @@ import CustomButton from '@/shared/ui/buttons/CustomButton';
 import InputBox from '@/shared/ui/input-box/InputBox';
 import TimeSelectBox from './TimeSelectBox';
 import PlusIcon from '@/shared/assets/icons/plus.svg?react';
-import AiSelectionModal from './AISelectionModal';
+import AiSelectionModal from './AiSelectionModal';
 
 import { useQuizContext } from '../contexts/useQuizContext';
 import { QuizData } from '../contexts/quizContext.types';

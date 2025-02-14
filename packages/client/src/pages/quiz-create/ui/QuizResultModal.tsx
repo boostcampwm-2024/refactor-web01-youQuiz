@@ -29,14 +29,14 @@ interface QuizResultModalProps {
   onAdditionalQuery: (prompt: string) => void;
 }
 
-function QuizItem({ quiz, index }: { quiz: Quiz; index: number }) {
+function QuizItem({ quiz }: { quiz: Quiz; index: number }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsOpen(!isOpen);
-  }
+  };
 
   return (
     <div className="border rounded-lg mb-2">
@@ -61,16 +61,19 @@ function QuizItem({ quiz, index }: { quiz: Quiz; index: number }) {
               <div
                 key={choiceIndex}
                 className={`p-3 rounded-lg ${
-                  choice.isCorrect 
-                    ? 'bg-green-50 border border-green-200' 
+                  choice.isCorrect
+                    ? 'bg-green-50 border border-green-200'
                     : 'bg-gray-50 border border-gray-200'
                 }`}
               >
                 <div className="flex items-start">
                   <span className="mr-2 text-gray-500">
-                    {quiz.quizType === 'TF' 
-                      ? (choiceIndex === 0 ? 'T' : 'F') 
-                      : `${choiceIndex + 1}`}.
+                    {quiz.quizType === 'TF'
+                      ? choiceIndex === 0
+                        ? 'T'
+                        : 'F'
+                      : `${choiceIndex + 1}`}
+                    .
                   </span>
                   <span>{choice.content}</span>
                 </div>
@@ -83,14 +86,10 @@ function QuizItem({ quiz, index }: { quiz: Quiz; index: number }) {
   );
 }
 
-export default function QuizResultModal({ 
-  quizzes = [],
-  onClose,
-  onAdditionalQuery 
-}: QuizResultModalProps) {
+export default function QuizResultModal({ quizzes = [], onClose }: QuizResultModalProps) {
   const { setQuizzes } = useQuizContext();
   const [showPromptInput, setShowPromptInput] = useState(false);
-  const [queryCount, setQueryCount] = useState(0);
+  const [queryCount] = useState(0);
   const [prompt, setPrompt] = useState('');
   const { mutate, isPending } = useCreateAIQuiz();
   const { classId } = useParams();
@@ -99,7 +98,7 @@ export default function QuizResultModal({
   // const handleAdditionalQuery = (e: React.FormEvent) => {
   //   e.preventDefault();
   //   if (queryCount >= MAX_ADDITIONAL_QUERIES) return;
-    
+
   //   if (showPromptInput && prompt.trim()) {
   //     onAdditionalQuery(prompt);
   //     setPrompt('');
@@ -112,12 +111,12 @@ export default function QuizResultModal({
 
   const handleNotImplemented = () => {
     toast.info('추가 질의 기능은 아직 구현되지 않았습니다.');
-  }
+  };
 
   const handleCancel = () => {
     setQuizzes([{ ...INITIAL_QUIZ_VALUE }]);
     onClose();
-  }
+  };
 
   const handleNewQuery = () => {
     if (prompt.trim()) {
@@ -128,14 +127,17 @@ export default function QuizResultModal({
             setQuizzes(data.data.quizzes);
             setPrompt('');
             setShowPromptInput(false);
-          }
-        }
+          },
+        },
       );
     }
-  }
+  };
 
   return (
-    <div className="bg-white rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="bg-white rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -148,13 +150,9 @@ export default function QuizResultModal({
         </div>
         <div className="space-y-2">
           {quizzes && quizzes.length > 0 ? (
-            quizzes.map((quiz, index) => (
-              <QuizItem key={index} quiz={quiz} index={index} />
-            ))
+            quizzes.map((quiz, index) => <QuizItem key={index} quiz={quiz} index={index} />)
           ) : (
-            <div className="text-center py-8 text-gray-500">
-              생성된 퀴즈가 없습니다.
-            </div>
+            <div className="text-center py-8 text-gray-500">생성된 퀴즈가 없습니다.</div>
           )}
         </div>
         {showPromptInput && (
