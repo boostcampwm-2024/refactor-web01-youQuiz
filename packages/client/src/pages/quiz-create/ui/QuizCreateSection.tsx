@@ -1,10 +1,13 @@
 import { useState, useRef } from 'react';
+import { Bot } from 'lucide-react';
 
 import CustomButton from '@/shared/ui/buttons/CustomButton';
 import InputBox from '@/shared/ui/input-box/InputBox';
 import AnswerBox from './AnswerBox';
 import TimeSelectBox from './TimeSelectBox';
 import PlusIcon from '@/shared/assets/icons/plus.svg?react';
+import AiSelectionModal from './AISelectionModal';
+
 import { useQuizContext } from '../contexts/useQuizContext';
 import { QuizData } from '../contexts/quizContext.types';
 
@@ -14,6 +17,10 @@ export default function QuizCreateSection() {
 
   const [showTimeSelect, setShowTimeSelect] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const [selectionModal, setSelectionModal] = useState(false);
+  const inputValidation =
+    quizData.content !== '' && quizData.choices.findIndex((e) => e.isCorrect === true) >= 0;
 
   const onQuizUpdate = (updatedData: QuizData) => {
     setQuizzes((prev) => {
@@ -37,6 +44,12 @@ export default function QuizCreateSection() {
       ...quizData,
       choices: updatedChoices,
     });
+  };
+
+  const onAiSelectionClick = () => {
+    //TODO: 모달창 열리기
+    setSelectionModal(true);
+    //버튼에 로딩이 보이도록
   };
 
   return (
@@ -83,7 +96,7 @@ export default function QuizCreateSection() {
             />
           ))}
         </div>
-        <div className="self-start mt-4">
+        <div className="flex gap-2 self-start mt-4">
           <CustomButton
             Icon={PlusIcon}
             type="outline"
@@ -97,8 +110,25 @@ export default function QuizCreateSection() {
               });
             }}
           />
+          <CustomButton
+            Icon={Bot}
+            type="outline"
+            size="md"
+            color="primary"
+            label="AI 선택지 자동생성"
+            disable={!inputValidation}
+            onClick={onAiSelectionClick}
+          />
         </div>
       </article>
+
+      {selectionModal && (
+        <AiSelectionModal
+          onClose={() => setSelectionModal(false)}
+          content={quizData.content}
+          choices={quizData.choices}
+        />
+      )}
     </section>
   );
 }

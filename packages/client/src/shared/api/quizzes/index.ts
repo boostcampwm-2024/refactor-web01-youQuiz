@@ -19,4 +19,11 @@ export const createAIQuiz = async (classId: number, text: string) => {
   return apiClient.post(`/classes/${classId}/quizzes/ai/generate`, {
     body: { text },
   });
-}
+};
+
+export const createAIChoices = async (classId: number, choices: any) => {
+  console.log(choices);
+  return apiClient.post(`/classes/${classId}/quizzes/choices/ai/generate`, {
+    body: { ...choices },
+  });
+};
