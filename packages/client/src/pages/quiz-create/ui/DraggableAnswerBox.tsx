@@ -1,4 +1,4 @@
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Trash2 } from 'lucide-react';
 
 import AnswerBox from './AnswerBox';
 interface DraggableAnswerBoxProps {
@@ -16,6 +16,7 @@ interface DraggableAnswerBoxProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   index: number;
   onDragComplete: (arg0: number, arg1: number) => void;
+  onDeleteChoice: () => void;
 }
 
 export default function DraggableAnswerBox({
@@ -27,11 +28,12 @@ export default function DraggableAnswerBox({
   value,
   index,
   onDragComplete,
+  onDeleteChoice,
 }: DraggableAnswerBoxProps) {
   return (
     <div
       draggable
-      className="flex gap-1 items-center cursor-move rounded p-2 mb-2 bg-white"
+      className="flex gap-1 items-center rounded p-2 mb-2 bg-white"
       onDragStart={(e) => {
         e.dataTransfer.setData('text/plain', index.toString());
       }}
@@ -44,7 +46,7 @@ export default function DraggableAnswerBox({
         onDragComplete(fromIndex, index);
       }}
     >
-      <GripVertical className="w-5 h-5 text-gray-300" />
+      <GripVertical className="w-5 h-5 text-gray-300 cursor-move" />
       <AnswerBox
         selected={selected}
         answerSetter={answerSetter}
@@ -52,6 +54,10 @@ export default function DraggableAnswerBox({
         inputRef={inputRef}
         onKeyDown={onKeyDown}
         value={value}
+      />
+      <Trash2
+        className="cursor-pointer w-5 h-5 text-gray-300 hover:text-red-100"
+        onClick={onDeleteChoice}
       />
     </div>
   );

@@ -31,6 +31,14 @@ const DraggableAnswerContainer = ({
     });
   };
 
+  const deleteChoice = (index: number) => {
+    const updatedChoices = quizData.choices.filter((_, i) => i !== index);
+    onQuizUpdate({
+      ...quizData,
+      choices: updatedChoices,
+    });
+  };
+
   return (
     <div className="space-y-2">
       {quizData.choices.map((choice, index) => (
@@ -46,6 +54,7 @@ const DraggableAnswerContainer = ({
           onKeyDown={(e) => handleKeyDown(index, e)}
           value={choice.content}
           onDragComplete={handleDragComplete}
+          onDeleteChoice={() => deleteChoice(index)}
         />
       ))}
     </div>
