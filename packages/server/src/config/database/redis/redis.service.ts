@@ -57,6 +57,10 @@ export class RedisService {
     await this.redis.expire(hashKey, expireInSeconds);
   }
 
+  async zadd(key: string, score: number, member: string) {
+    await this.redis.zadd(key, score, member);
+  }
+
   async zincrby(key: string, increment: number, member: string) {
     await this.redis.zincrby(key, increment, member);
   }
