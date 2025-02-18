@@ -80,8 +80,4 @@ export class RedisService {
   async zrem(key: string, member: string) {
     await this.redis.zrem(key, member);
   }
-
-  async call(command: string, ...args: any[]) {
-    return await this.redis.call(command, ...args);
-  }
 }
