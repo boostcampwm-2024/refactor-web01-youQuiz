@@ -27,6 +27,7 @@
     "dotenv": "^16.4.5",
     "ioredis": "^5.4.1",
     "joi": "^17.13.3",
+    "langsmith": "^0.3.7",
     "moment": "^2.30.1",
     "mysql2": "^3.11.3",
     "openai": "^4.82.0",
@@ -36,7 +37,8 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1",
     "typeorm": "^0.3.20",
-    "uuid": "^11.0.3"
+    "uuid": "^11.0.3",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@nestjs/testing": "^10.4.6",
