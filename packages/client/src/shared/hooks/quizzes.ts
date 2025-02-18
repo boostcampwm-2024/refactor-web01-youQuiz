@@ -1,5 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createAIQuiz, createQuiz, createAIChoices, requestAdditionalQuiz } from '../api/quizzes';
+import {
+  createAIQuiz,
+  createQuiz,
+  createAIChoices,
+  requestAdditionalQuiz,
+  postFeedback,
+} from '../api/quizzes';
 import { QuizData } from '@/pages/quiz-create/contexts/quizContext.types';
 import { toastController } from '@/features/toast/model/toastController';
 import { useNavigate } from 'react-router-dom';
@@ -107,5 +113,17 @@ export const useRequestAdditionalQuiz = () => {
 
       return { previousHistory };
     },
+  });
+};
+
+export const usePostFeedback = () => {
+  const toast = toastController();
+  return useMutation({
+    mutationKey: ['quiz', 'AI', 'feedback'],
+    mutationFn: ({ classId, prompts, feedback }: any) => postFeedback(classId, prompts, feedback),
+    onSuccess: () => {
+      toast.success('피드백이 감사합니다.');
+    },
+    onError: () => toast.error('피드백 전송에 실패했습니다.'),
   });
 };
