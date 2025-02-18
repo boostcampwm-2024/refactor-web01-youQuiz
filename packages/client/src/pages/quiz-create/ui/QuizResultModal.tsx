@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { LightbulbIcon, X, ChevronDown } from 'lucide-react';
+import { LightbulbIcon, X, ChevronDown, ThumbsUp, ThumbsDown, Loader } from 'lucide-react';
 import { useQuizContext } from '../contexts/useQuizContext';
-import { useCreateAIQuiz } from '@/shared/hooks/quizzes';
+import { useRequestAdditionalQuiz } from '@/shared/hooks/quizzes';
 import { useParams } from 'react-router-dom';
 import { toastController } from '@/features/toast/model/toastController';
 import { INITIAL_QUIZ_VALUE } from '../contexts/quizContext';
@@ -26,7 +26,6 @@ interface Quiz {
 interface QuizResultModalProps {
   quizzes?: Quiz[];
   onClose: () => void;
-  onAdditionalQuery: (prompt: string) => void;
 }
 
 function QuizItem({ quiz }: { quiz: Quiz; index: number }) {
@@ -89,28 +88,37 @@ function QuizItem({ quiz }: { quiz: Quiz; index: number }) {
 export default function QuizResultModal({ quizzes = [], onClose }: QuizResultModalProps) {
   const { setQuizzes } = useQuizContext();
   const [showPromptInput, setShowPromptInput] = useState(false);
-  const [queryCount] = useState(0);
+  const [queryCount, setQueryCount] = useState(0);
   const [prompt, setPrompt] = useState('');
-  const { mutate, isPending } = useCreateAIQuiz();
+  const { mutate, isPending } = useRequestAdditionalQuiz();
   const { classId } = useParams();
   const toast = toastController();
 
-  // const handleAdditionalQuery = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (queryCount >= MAX_ADDITIONAL_QUERIES) return;
+  const handleAdditionalQuery = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (queryCount >= MAX_ADDITIONAL_QUERIES) {
+      toast.info('더 이상 추가 질의를 할 수 없습니다.');
+      return;
+    }
 
-  //   if (showPromptInput && prompt.trim()) {
-  //     onAdditionalQuery(prompt);
-  //     setPrompt('');
-  //     setQueryCount(prev => prev + 1);
-  //     setShowPromptInput(false);
-  //   } else {
-  //     setShowPromptInput(true);
-  //   }
-  // };
+    if (showPromptInput && prompt.trim()) {
+      // onAdditionalQuery(prompt);
+      // setPrompt('');
+      console.log('onAdditionalQuery(prompt);');
+      setQueryCount((prev) => prev + 1);
+      setShowPromptInput(false);
+    } else {
+      setShowPromptInput((pre) => !pre);
+    }
+  };
 
-  const handleNotImplemented = () => {
-    toast.info('추가 질의 기능은 아직 구현되지 않았습니다.');
+  const handleFeedback = (type: string) => {
+    if (type === 'up') {
+      // toast.success('피드백이 전송되었습니다.');
+      // api request
+    } else {
+      // toast.error('피드백이 전송되었습니다.');
+    }
   };
 
   const handleCancel = () => {
@@ -120,13 +128,18 @@ export default function QuizResultModal({ quizzes = [], onClose }: QuizResultMod
 
   const handleNewQuery = () => {
     if (prompt.trim()) {
+      console.log(prompt);
       mutate(
         { classId: Number(classId), text: prompt },
         {
           onSuccess: (data) => {
             setQuizzes(data.data.quizzes);
             setPrompt('');
+            setQueryCount((prev) => prev + 1);
             setShowPromptInput(false);
+          },
+          onError: (error) => {
+            console.log(error);
           },
         },
       );
@@ -154,15 +167,36 @@ export default function QuizResultModal({ quizzes = [], onClose }: QuizResultMod
           ) : (
             <div className="text-center py-8 text-gray-500">생성된 퀴즈가 없습니다.</div>
           )}
+          {quizzes && quizzes.length > 0 && (
+            <div className="flex gap-2 justify-end px-2">
+              <button
+                className="text-gray-400 hover:text-blue-600"
+                onClick={() => handleFeedback('up')}
+              >
+                <ThumbsUp className="w-4" />
+              </button>
+              <button
+                className="text-gray-400 hover:text-red-200"
+                onClick={() => handleFeedback('down')}
+              >
+                <ThumbsDown className="w-4" />
+              </button>
+            </div>
+          )}
         </div>
+
         {showPromptInput && (
           <div className="space-y-4">
-            <textarea
-              className="w-full min-h-[200px] p-4 text-gray-700 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="퀴즈 생성을 위한 프롬프트를 입력해주세요."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-            />
+            {isPending ? (
+              <Loader className="w-6 h-6 animate-spin mx-auto" />
+            ) : (
+              <textarea
+                className="w-full min-h-[200px] p-4 text-gray-700 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                placeholder="퀴즈 생성을 위한 프롬프트를 입력해주세요."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+              />
+            )}
             <button
               onClick={handleNewQuery}
               className="px-4 py-2 inline-flex bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -184,11 +218,11 @@ export default function QuizResultModal({ quizzes = [], onClose }: QuizResultMod
               취소
             </button>
             <button
-              onClick={handleNotImplemented}
+              onClick={handleAdditionalQuery}
               disabled={queryCount >= MAX_ADDITIONAL_QUERIES}
               className="px-4 py-2 text-blue-600 hover:text-blue-700 border border-blue-600 rounded-lg hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              추가 질의
+              질의 추가
             </button>
             <button
               onClick={onClose}
