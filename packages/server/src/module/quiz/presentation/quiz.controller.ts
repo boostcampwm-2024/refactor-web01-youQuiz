@@ -23,6 +23,7 @@ import { CreateQuizWithAiDto } from './dto/request/create-quiz-with-ai.request.d
 import { CreateQuizWithAiResponseDto } from './dto/response/create-quiz-with-ai.response.dto';
 import { CreateChoiceWithAiResponseDto } from './dto/response/create-chioce-with-ai.response.dto';
 import { CreateChoiceWithAiDto } from './dto/request/create-choice-with-ai.request.dto';
+import { CreateAdjustedQuizWithAiDto } from './dto/request/create-adjust-quiz-with-ai.request.dto';
 
 @Controller('api')
 export class QuizController {
@@ -92,5 +93,11 @@ export class QuizController {
   @UseInterceptors(new TransformInterceptor(CreateChoiceWithAiResponseDto))
   async getAiChoice(@Body() dto: CreateChoiceWithAiDto): Promise<CreateChoiceWithAiResponseDto> {
     return await this.quizService.createAiChoices(dto);
+  }
+
+  @Post('/classes/:classId/quizzes/ai/generate/adjust')
+  @UseInterceptors(new TransformInterceptor(CreateQuizWithAiResponseDto))
+  async getAdjustedQuiz(@Body() conversationHistory: CreateAdjustedQuizWithAiDto): Promise<any> {
+    return await this.quizService.getAdjustedQuiz(conversationHistory);
   }
 }

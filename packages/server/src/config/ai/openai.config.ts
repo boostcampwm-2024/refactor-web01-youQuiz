@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
+import { template } from 'src/module/quiz/utils/gpt-ai-template';
 
 @Injectable()
 export class OpenAiService {
@@ -112,6 +113,13 @@ export class OpenAiService {
     return response.choices[0].message.content;
   }
 
+  async getAdjustedQuiz(conversationHistory: any[]): Promise<any> {
+    const requestPayload = template(conversationHistory);
+    const response = await this.openai.chat.completions.create(requestPayload);
+    console.log(response.choices[0].message.content);
+    return response.choices[0].message.content;
+  }
+
   async generateChoices(dto): Promise<any> {
     const { content, choices: existingChoices, difficulty, count } = dto;
     const response = await this.openai.chat.completions.create({
@@ -170,7 +178,7 @@ export class OpenAiService {
 
     return response.choices[0].message.content;
   }
-  
+
   async getEmbedding(text: string): Promise<number[]> {
     const response = await this.openai.embeddings.create({
       model: 'text-embedding-ada-002',

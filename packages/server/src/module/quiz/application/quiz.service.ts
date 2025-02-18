@@ -18,6 +18,9 @@ import { CreateChoiceWithAiDto } from '../presentation/dto/request/create-choice
 import { CreateChoiceWithAiResponseDto } from '../presentation/dto/response/create-chioce-with-ai.response.dto';
 import { RedisService } from 'src/config/database/redis/redis.service';
 import { cosineSimilarity } from '../utils/cosine-similarity';
+import { CreateAdjustedQuizWithAiDto } from '../presentation/dto/request/create-adjust-quiz-with-ai.request.dto';
+import { ConversationMessageDto } from '../presentation/dto/request/conversation-message.request.dto';
+import { RoleType } from '../domain/type/gpt-ai-role.enum';
 
 @Injectable()
 export class QuizService {
@@ -33,26 +36,41 @@ export class QuizService {
   async getAiQuiz(dto: CreateQuizWithAiDto): Promise<CreateQuizWithAiResponseDto> {
     const { text } = dto;
 
-    // Redis에서 동일한 요청 캐싱 확인
+    // 1️⃣ Redis에서 동일한 요청 캐싱 확인
     const cachedQuiz = await this.redisService.hget('quiz_data', text);
     if (cachedQuiz) {
       console.log('캐싱된 퀴즈 반환');
       return CreateQuizWithAiResponseDto.fromAiResponse(JSON.parse(cachedQuiz));
     }
 
-    // 유사한 퀴즈가 있는지 확인 (코사인 유사도 0.9 이상이면 사용)
-    const similarQuiz = await this.findSimilarQuiz(text);
-    if (similarQuiz) {
+    // 2️⃣ 유사한 퀴즈 확인 (임베딩 검색)
+    const similarQuizData = await this.findSimilarQuiz(text);
+    if (similarQuizData) {
       console.log('유사한 퀴즈 반환');
-      return CreateQuizWithAiResponseDto.fromAiResponse(similarQuiz);
+      return CreateQuizWithAiResponseDto.fromAiResponse(similarQuizData);
     }
 
-    // AI 호출하여 퀴즈 생성
+    // 3️⃣ AI 호출하여 퀴즈 생성
     console.log('AI 호출하여 새 퀴즈 생성');
     const aiGeneratedQuiz = JSON.parse(await this.openAiService.generateQuiz(text));
 
-    // Redis에 퀴즈 데이터 저장 + 벡터 임베딩 저장 + TTL 1시간
+    // 4️⃣ Redis에 퀴즈 및 임베딩 저장
     await this.storeQuizEmbedding(text, aiGeneratedQuiz);
+
+    return CreateQuizWithAiResponseDto.fromAiResponse(aiGeneratedQuiz);
+  }
+
+  async getAdjustedQuiz(dto: CreateAdjustedQuizWithAiDto): Promise<CreateQuizWithAiResponseDto> {
+    // CreateAdjustedQuizWithAiDto에 사이사이에 집어넣을 고차함수
+    const conversationHistory = dto.conversationHistory; // 사용자의 대화 내역
+
+    // Redis에서 캐싱된 AI 응답을 삽입하여 conversationHistory 확장
+    const updatedHistory = await this.insertCachedAssistantResponses(conversationHistory);
+
+    // OpenAI API에 맞게 messages 배열 생성
+    const aiGeneratedQuiz = JSON.parse(await this.openAiService.getAdjustedQuiz(updatedHistory));
+
+    await this.storeQuizEmbedding(this.textTransformer(conversationHistory), aiGeneratedQuiz);
 
     return CreateQuizWithAiResponseDto.fromAiResponse(aiGeneratedQuiz);
   }
@@ -161,39 +179,87 @@ export class QuizService {
     });
   }
 
-  async findSimilarQuiz(text: string): Promise<any | null> {
+  private async findSimilarQuiz(text: string): Promise<any | null> {
     const inputEmbedding = await this.openAiService.getEmbedding(text);
-    const storedQuizzes = await this.redisService.hgetall('quiz_embeddings');
+    const storedEmbeddings = await this.redisService.hgetall('quiz_embeddings');
+
+    if (!storedEmbeddings || Object.keys(storedEmbeddings).length === 0) {
+      return null;
+    }
 
     let mostSimilarQuiz = null;
     let highestSimilarity = 0;
 
-    for (const [quizText, vectorStr] of Object.entries(storedQuizzes)) {
+    for (const [embeddingKey, vectorStr] of Object.entries(storedEmbeddings)) {
       const storedVector = JSON.parse(vectorStr);
       const similarity = cosineSimilarity(inputEmbedding, storedVector);
 
-      if (similarity > highestSimilarity) {
+      if (similarity > highestSimilarity && similarity >= 0.98) {
         highestSimilarity = similarity;
-        mostSimilarQuiz = quizText;
+        mostSimilarQuiz = embeddingKey.replace('emb:', '');
       }
     }
 
-    if (highestSimilarity >= 0.9) {
-      return JSON.parse(await this.redisService.hget('quiz_data', mostSimilarQuiz));
+    if (mostSimilarQuiz) {
+      const originalQuizData = JSON.parse(
+        await this.redisService.hget('quiz_data', mostSimilarQuiz),
+      );
+
+      if (this.isSimilarPrompt(text, mostSimilarQuiz)) {
+        return originalQuizData;
+      }
     }
 
     return null;
   }
 
+  // 공통 단어 비율 계산 코드 추가
+  private isSimilarPrompt(inputPrompt: string, storedPrompt: string): boolean {
+    const inputWords = new Set(inputPrompt.split(' '));
+    const storedWords = new Set(storedPrompt.split(' '));
+
+    // 공통 단어 비율 계산 (50% 미만이면 false 반환)
+    const intersectionSize = [...inputWords].filter((word) => storedWords.has(word)).length;
+    const similarityRatio = intersectionSize / Math.max(inputWords.size, storedWords.size);
+
+    return similarityRatio >= 0.5; // 50% 이상 단어가 일치해야 함
+  }
+
   private async storeQuizEmbedding(text: string, quizData: any) {
     const embedding = await this.openAiService.getEmbedding(text);
+    const embeddingKey = `emb:${text}`;
 
-    await this.redisService.hsetWithExpire(
-      'quiz_embeddings',
-      text,
-      JSON.stringify(embedding),
-      86400,
-    );
-    await this.redisService.hsetWithExpire('quiz_data', text, JSON.stringify(quizData), 172800);
+    await Promise.all([
+      this.redisService.hsetWithExpire(
+        'quiz_embeddings',
+        embeddingKey,
+        JSON.stringify(embedding),
+        86400,
+      ), // 1일 보관
+      this.redisService.hsetWithExpire('quiz_data', text, JSON.stringify(quizData), 172800), // 2일 보관
+    ]);
+  }
+
+  private async insertCachedAssistantResponses(
+    conversationHistory: ConversationMessageDto[],
+  ): Promise<ConversationMessageDto[]> {
+    const enrichedHistory: ConversationMessageDto[] = [];
+    let userInput = '';
+
+    for (const message of conversationHistory) {
+      enrichedHistory.push(message);
+      userInput += message.text;
+
+      const cachedResponse = await this.redisService.hget('quiz_data', userInput);
+
+      if (cachedResponse) {
+        enrichedHistory.push({ role: RoleType.ASSISTANT, text: cachedResponse });
+      }
+    }
+    return enrichedHistory;
+  }
+
+  private textTransformer(conversationHistory: ConversationMessageDto[]): string {
+    return conversationHistory.reduce((acc, message) => acc + message.text, '');
   }
 }

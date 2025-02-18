@@ -14,6 +14,10 @@ export class RedisService {
     }
   }
 
+  async setex(key: string, expireInSeconds: number, value: string) {
+    await this.redis.setex(key, expireInSeconds, value);
+  }
+
   async exists(key: string) {
     return await this.redis.exists(key);
   }
