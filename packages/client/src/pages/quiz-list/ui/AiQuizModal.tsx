@@ -33,9 +33,9 @@ export default function AIQuizModal({ onClose }: AIQuizModalProps) {
   if (isSuccess) {
     return (
       <Modal onClose={onClose}>
-        <QuizResultModal quizzes={quizzes} onClose={onClose} onAdditionalQuery={setPrompt}/>
+        <QuizResultModal quizzes={quizzes} onClose={onClose} />
       </Modal>
-    )
+    );
   }
 
   return (
