@@ -14,6 +14,10 @@ export class RedisService {
     }
   }
 
+  async setex(key: string, expireInSeconds: number, value: string) {
+    await this.redis.setex(key, expireInSeconds, value);
+  }
+
   async exists(key: string) {
     return await this.redis.exists(key);
   }
@@ -75,5 +79,9 @@ export class RedisService {
 
   async zrem(key: string, member: string) {
     await this.redis.zrem(key, member);
+  }
+
+  async call(command: string, ...args: any[]) {
+    return await this.redis.call(command, ...args);
   }
 }
