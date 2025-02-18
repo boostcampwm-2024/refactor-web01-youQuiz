@@ -21,6 +21,7 @@ import { cosineSimilarity } from '../utils/cosine-similarity';
 import { CreateAdjustedQuizWithAiDto } from '../presentation/dto/request/create-adjust-quiz-with-ai.request.dto';
 import { ConversationMessageDto } from '../presentation/dto/request/conversation-message.request.dto';
 import { RoleType } from '../domain/type/gpt-ai-role.enum';
+import { CreateQuizFeedbackRequestDto } from '../presentation/dto/request/create-quiz-feedback.request.dto';
 
 @Injectable()
 export class QuizService {
@@ -73,6 +74,10 @@ export class QuizService {
     await this.storeQuizEmbedding(this.textTransformer(conversationHistory), aiGeneratedQuiz);
 
     return CreateQuizWithAiResponseDto.fromAiResponse(aiGeneratedQuiz);
+  }
+
+  async getFeedbackQuiz(dto: CreateQuizFeedbackRequestDto): Promise<void> {
+    await this.storeFeedback(dto);
   }
 
   async createClass(dto: CreateClassRequestDto): Promise<CreateClassResponseDto> {
@@ -261,5 +266,24 @@ export class QuizService {
 
   private textTransformer(conversationHistory: ConversationMessageDto[]): string {
     return conversationHistory.reduce((acc, message) => acc + message.text, '');
+  }
+
+  private async storeFeedback(dto: CreateQuizFeedbackRequestDto): Promise<void> {
+    const { prompts, feedback } = dto;
+    const prompt = prompts.join('');
+    const timestamp = Date.now();
+
+    const aiResponse = await this.redisService.hget('quiz_data', prompt);
+
+    await this.redisService.zadd(
+      'feedbacks',
+      timestamp,
+      JSON.stringify({
+        prompt,
+        response: aiResponse,
+        feedback,
+        timestamp,
+      }),
+    );
   }
 }
