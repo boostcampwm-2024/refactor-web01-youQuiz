@@ -38,3 +38,9 @@ export const requestAdditionalQuiz = async (classId: number, promptHistory: Prom
     body: { conversationHistory: promptHistory },
   });
 };
+
+export const postFeedback = async (classId: number, prompts: string[], feedback: string) => {
+  return apiClient.post(`/classes/${classId}/quizzes/ai/generate/feedback`, {
+    body: { prompts, feedback },
+  });
+};

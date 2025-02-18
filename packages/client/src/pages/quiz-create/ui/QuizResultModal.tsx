@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { LightbulbIcon, X, ChevronDown, ThumbsUp, ThumbsDown, Loader } from 'lucide-react';
 import { useQuizContext } from '../contexts/useQuizContext';
-import { useRequestAdditionalQuiz } from '@/shared/hooks/quizzes';
-import { useParams } from 'react-router-dom';
+import { useRequestAdditionalQuiz, usePostFeedback } from '@/shared/hooks/quizzes';
 import { toastController } from '@/features/toast/model/toastController';
 import { INITIAL_QUIZ_VALUE } from '../contexts/quizContext';
 
@@ -26,6 +27,10 @@ interface Quiz {
 interface QuizResultModalProps {
   quizzes?: Quiz[];
   onClose: () => void;
+}
+interface PromptHistory {
+  role: string;
+  text: string;
 }
 
 function QuizItem({ quiz }: { quiz: Quiz; index: number }) {
@@ -91,8 +96,10 @@ export default function QuizResultModal({ quizzes = [], onClose }: QuizResultMod
   const [queryCount, setQueryCount] = useState(0);
   const [prompt, setPrompt] = useState('');
   const { mutate, isPending } = useRequestAdditionalQuiz();
+  const { mutate: postFeeback } = usePostFeedback();
   const { classId } = useParams();
   const toast = toastController();
+  const queryClient = useQueryClient();
 
   const handleAdditionalQuery = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,12 +120,11 @@ export default function QuizResultModal({ quizzes = [], onClose }: QuizResultMod
   };
 
   const handleFeedback = (type: string) => {
-    if (type === 'up') {
-      // toast.success('피드백이 전송되었습니다.');
-      // api request
-    } else {
-      // toast.error('피드백이 전송되었습니다.');
-    }
+    const previousHistory =
+      queryClient.getQueryData<PromptHistory[]>(['promptHistory', Number(classId)]) ?? [];
+    const prompts = previousHistory.map((prev) => prev.text);
+    console.log(prompts);
+    postFeeback({ classId: Number(classId), prompts, feedback: type });
   };
 
   const handleCancel = () => {
@@ -171,13 +177,13 @@ export default function QuizResultModal({ quizzes = [], onClose }: QuizResultMod
             <div className="flex gap-2 justify-end px-2">
               <button
                 className="text-gray-400 hover:text-blue-600"
-                onClick={() => handleFeedback('up')}
+                onClick={() => handleFeedback('positive')}
               >
                 <ThumbsUp className="w-4" />
               </button>
               <button
                 className="text-gray-400 hover:text-red-200"
-                onClick={() => handleFeedback('down')}
+                onClick={() => handleFeedback('negative')}
               >
                 <ThumbsDown className="w-4" />
               </button>
