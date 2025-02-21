@@ -7,15 +7,17 @@ import { QuizRepository } from './infrastructure/quiz.repository';
 import { ChoiceRepository } from './infrastructure/choice.repository';
 import { ClassRepository } from './infrastructure/class.repository';
 import { QuizService } from './application/quiz.service';
+import { QuizEvaluationService } from './application/quiz-evaluation.service';
 import { QuizController } from './presentation/quiz.controller';
+import { QuizEvaluationController } from './presentation/quiz-evaluate.controller';
 import { OpenAiService } from 'src/config/ai/openai.config';
 import { OpenAiModule } from 'src/config/ai/openai.module';
 import { RedisModule } from '../../config/database/redis/redis.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Quiz, Choice, Class]), RedisModule, OpenAiModule],
-  controllers: [QuizController],
-  providers: [QuizService, QuizRepository, ChoiceRepository, ClassRepository, OpenAiService],
+  controllers: [QuizController, QuizEvaluationController],
+  providers: [QuizService, QuizEvaluationService, QuizRepository, ChoiceRepository, ClassRepository, OpenAiService],
   exports: [QuizRepository, ChoiceRepository, ClassRepository],
 })
 export class QuizModule {}
